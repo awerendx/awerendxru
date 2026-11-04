@@ -1,0 +1,2108 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#050507">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="AweR (@awerendx) — redhaze.ru">
+    <title>AweR (@awerendx) — redhaze.ru</title>
+    <!-- Exact RH Vector Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='32' fill='%23000000'/%3E%3Cpath d='M95 52 H118 V89 H143 V52 H166 V148 H143 V110 H118 V148 H95 Z' fill='%23ffffff'/%3E%3Cpath d='M36 52 H84 C104 52 116 63 116 80 C116 93 107 103 93 106 L124 148 H97 L68 108 H59 V148 H36 V75 H59 V89 H81 C90 89 94 85 94 79.5 C94 74 90 70 81 70 H36 Z' fill='%23000000' stroke='%23000000' stroke-width='11' stroke-linejoin='round'/%3E%3Cpath d='M36 52 H84 C104 52 116 63 116 80 C116 93 107 103 93 106 L124 148 H97 L68 108 H59 V148 H36 V75 H59 V89 H81 C90 89 94 85 94 79.5 C94 74 90 70 81 70 H36 Z' fill='%23d91b24'/%3E%3C/svg%3E">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        /* hover-стили только там, где есть настоящий hover (на телефонах не залипают после тапа) */
+        if (window.tailwind) { tailwind.config = { future: { hoverOnlyWhenSupported: true } }; }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@700;800&family=Unbounded:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --accent: #e11d2a;
+            --accent-rgb: 225, 29, 42;
+            --bg-deep: #050507;
+            --grain-opacity: 0.04;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        *::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+
+        html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-deep);
+            color: #f4f4f6;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            min-height: 100dvh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .page-pad {
+            padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+        }
+        @media (min-width: 640px) { .page-pad { padding: 24px; } }
+
+        button, a, [role="button"], input[type="range"] { touch-action: manipulation; }
+        button { font-family: inherit; }
+
+        .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+        .font-aver { font-family: 'Unbounded', 'Syne', sans-serif; }
+
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .ambient-haze {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 50% 15%, rgba(var(--accent-rgb), 0.14) 0%, transparent 55%),
+                radial-gradient(circle at 85% 85%, rgba(var(--accent-rgb), 0.08) 0%, transparent 50%),
+                radial-gradient(circle at center, transparent 10%, rgba(4, 4, 6, 0.95) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .film-grain {
+            position: fixed;
+            inset: -50%;
+            width: 200%;
+            height: 200%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: var(--grain-opacity);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        #enter-overlay {
+            position: fixed;
+            inset: 0;
+            background: #040406;
+            z-index: 70;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.85s;
+        }
+
+        #enter-overlay.gate-hidden {
+            opacity: 0;
+            transform: scale(1.04);
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        #bento-shell {
+            background: rgba(9, 9, 13, 0.84);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 
+                0 30px 80px -15px rgba(0, 0, 0, 0.95),
+                0 0 50px -15px rgba(var(--accent-rgb), 0.15);
+            transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), filter 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.5s ease, box-shadow 0.5s ease;
+            position: relative;
+            z-index: 10;
+        }
+
+        .shell-pre-reveal {
+            opacity: 0;
+            filter: blur(18px) brightness(0.4);
+            transform: translateY(18px) scale(0.98);
+        }
+
+        .shell-loaded {
+            opacity: 1;
+            filter: blur(0px) brightness(1);
+            transform: translateY(0) scale(1);
+        }
+
+        .stagger-item {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .stagger-item.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes zamerImpact {
+            0% { border-color: rgba(255,255,255,0.06); }
+            30% {
+                box-shadow: 0 30px 95px -5px rgba(225,29,42,0.55);
+                border-color: rgba(225,29,42,0.75);
+            }
+            100% { border-color: rgba(255,255,255,0.06); }
+        }
+
+        .zamer-impact-active {
+            animation: zamerImpact 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .bento-module {
+            background: rgba(14, 14, 19, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.055);
+            transition: border-color 0.25s ease, background-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (hover: hover) {
+            .bento-module:hover { border-color: rgba(255, 255, 255, 0.11); }
+        }
+
+        .project-showcase-card {
+            background: linear-gradient(135deg, rgba(34, 10, 15, 0.92) 0%, rgba(14, 12, 17, 0.96) 65%, rgba(22, 10, 14, 0.92) 100%);
+            border: 1px solid rgba(225, 29, 42, 0.35);
+            box-shadow: 0 10px 30px -10px rgba(225, 29, 42, 0.22);
+        }
+
+        @media (hover: hover) {
+            .project-showcase-card:hover {
+                border-color: rgba(225, 29, 42, 0.75);
+                box-shadow: 0 14px 36px -8px rgba(225, 29, 42, 0.38);
+                transform: translateY(-2px);
+            }
+        }
+
+        .aver-chrome-title {
+            background: linear-gradient(180deg, #ffffff 0%, #e4e4e7 60%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.03em;
+        }
+
+        .banner-word-item {
+            position: absolute;
+            font-family: 'Unbounded', sans-serif;
+            font-weight: 900;
+            font-size: clamp(22px, 5vw, 32px);
+            letter-spacing: 0.06em;
+            background: linear-gradient(180deg, #ffffff 0%, #f4f4f6 55%, #fda4af 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 18px rgba(225, 29, 42, 0.75)) blur(10px);
+            opacity: 0;
+            transform: translateY(10px) scale(0.92);
+            transition: opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+                        filter 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: opacity, transform, filter;
+            pointer-events: none;
+        }
+
+        .banner-word-item.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: drop-shadow(0 0 22px rgba(225, 29, 42, 0.9)) blur(0px);
+        }
+
+        .nav-tab-btn {
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.02);
+            color: #a1a1aa;
+        }
+
+        @media (hover: hover) {
+            .nav-tab-btn:hover { color: #ffffff; background: rgba(255, 255, 255, 0.05); }
+        }
+
+        .nav-tab-btn.active {
+            color: #ffffff;
+            background: rgba(225, 29, 42, 0.18);
+            border-color: rgba(225, 29, 42, 0.55);
+            box-shadow: 0 0 16px -4px rgba(225, 29, 42, 0.35);
+        }
+
+        #spotify-lyrics-viewport {
+            height: 128px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            position: relative;
+            mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
+        }
+
+        .sp-lyric-line {
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.4;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.22);
+            transform: scale(0.96);
+            transform-origin: left center;
+            transition: color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                        background-color 0.2s ease,
+                        filter 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        @media (hover: hover) {
+            .sp-lyric-line:hover { color: rgba(255, 255, 255, 0.65); background: rgba(255, 255, 255, 0.03); }
+        }
+
+        .sp-lyric-line.sp-past {
+            color: rgba(255, 255, 255, 0.38);
+            transform: scale(0.97);
+            filter: blur(0.3px);
+        }
+
+        .sp-lyric-line.sp-active {
+            color: #ffffff;
+            font-size: 14.5px;
+            transform: scale(1);
+            background: linear-gradient(90deg, rgba(225, 29, 42, 0.16) 0%, rgba(225, 29, 42, 0.02) 100%);
+            text-shadow: 0 0 18px rgba(225, 29, 42, 0.55);
+            filter: blur(0px);
+        }
+
+        .sp-word {
+            transition: color 0.08s ease, text-shadow 0.08s ease;
+        }
+
+        .sp-lyric-line.sp-active .sp-word.word-sung { color: #ffffff; }
+        .sp-lyric-line.sp-active .sp-word.word-current {
+            color: #ff3b47;
+            text-shadow: 0 0 12px rgba(225, 29, 42, 0.95);
+        }
+        .sp-lyric-line.sp-active .sp-word.word-upcoming { color: rgba(255, 255, 255, 0.52); }
+
+        .sp-line-progress {
+            position: absolute;
+            left: 10px;
+            bottom: 2px;
+            height: 2px;
+            background: #e11d2a;
+            border-radius: 2px;
+            width: 0%;
+            opacity: 0;
+            transition: width 0.06s linear;
+        }
+
+        .sp-lyric-line.sp-active .sp-line-progress { opacity: 0.9; }
+
+        .track-row {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.045);
+            transition: all 0.22s ease;
+            cursor: pointer;
+        }
+
+        @media (hover: hover) {
+            .track-row:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.12); }
+        }
+
+        .track-row.active-track {
+            background: linear-gradient(90deg, rgba(225, 29, 42, 0.16) 0%, rgba(20, 20, 26, 0.6) 100%);
+            border-color: rgba(225, 29, 42, 0.55);
+        }
+
+        .rh-logo-glow { filter: drop-shadow(0 0 10px rgba(225, 29, 42, 0.5)); }
+
+        .avatar-frame {
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.12);
+        }
+
+        #avatar-img {
+            object-fit: cover;
+            object-position: center 22%;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.08);
+            height: 4px;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: #e11d2a;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 8px rgba(225, 29, 42, 0.8);
+        }
+
+        /* Firefox: раньше ползунок громкости там был стандартным */
+        input[type="range"]::-moz-range-thumb {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #e11d2a;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 8px rgba(225, 29, 42, 0.8);
+        }
+        input[type="range"]::-moz-range-track { background: transparent; height: 4px; }
+
+        .bento-section-hidden { display: none !important; }
+
+        #visualizer-canvas { display: block; width: 100%; height: 20px; }
+        #buda-banner-canvas { display: block; width: 100%; height: 100%; }
+
+        /* ===== ОПТИМИЗАЦИЯ ПОД ТЕЛЕФОНЫ ===== */
+        #timeline-hit { touch-action: pan-y; }
+
+        @media (pointer: coarse) {
+            input[type="range"] { height: 6px; }
+            input[type="range"]::-webkit-slider-thumb { width: 20px; height: 20px; }
+            input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; }
+            #volume-slider { width: 96px; }
+            .nav-tab-btn { min-height: 40px; }
+            .track-row button, #key-jump-btn { min-height: 36px; padding-left: 10px; padding-right: 10px; }
+            .sp-lyric-line { padding-top: 8px; padding-bottom: 8px; }
+        }
+
+        @media (max-width: 640px) {
+            /* тяжёлые эффекты — главный источник лагов на слабых телефонах */
+            .film-grain { inset: 0; width: 100%; height: 100%; }
+            #bento-shell {
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                background: rgba(9, 9, 13, 0.92);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .stagger-item, #bento-shell, #enter-overlay { transition-duration: 0.01s !important; }
+            .animate-ping, .animate-pulse { animation: none !important; }
+        }
+
+        .track-row:focus-visible, #enter-overlay:focus-visible,
+        button:focus-visible, a:focus-visible {
+            outline: 2px solid rgba(225, 29, 42, 0.9);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="page-pad relative flex items-center justify-center selection:bg-red-600/30 selection:text-white">
+
+    <!-- АУДИО-ДОРОЖКИ (playsinline для идеальной работы на iPhone / Android) -->
+    <div class="hidden" aria-hidden="true">
+        <audio id="audio-OUTRO_GRUST2" preload="auto" playsinline webkit-playsinline>
+            <source src="grust2.mp3" type="audio/mpeg">
+            <source src="Грусть 2.mp3" type="audio/mpeg">
+            <source src="грусть 2.mp3" type="audio/mpeg">
+            <source src="OG Buda - Грусть 2.mp3" type="audio/mpeg">
+            <source src="1.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="audio-ZAMER_MAIN" preload="auto" playsinline webkit-playsinline>
+            <source src="zamer.mp3" type="audio/mpeg">
+            <source src="Замер.mp3" type="audio/mpeg">
+            <source src="замер.mp3" type="audio/mpeg">
+            <source src="Heronwater - Замер.mp3" type="audio/mpeg">
+            <source src="2.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="audio-MIKRO_444" preload="auto" playsinline webkit-playsinline>
+            <source src="mikro.mp3" type="audio/mpeg">
+            <source src="На микро вечен.mp3" type="audio/mpeg">
+            <source src="На Микро Вечен.mp3" type="audio/mpeg">
+            <source src="на микро вечен.mp3" type="audio/mpeg">
+            <source src="OG Buda - На Микро Вечен.mp3" type="audio/mpeg">
+            <source src="OG Buda - На микро вечен.mp3" type="audio/mpeg">
+            <source src="3.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <!-- SVG Defs: RH Logo + 3 Album Covers -->
+    <svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none">
+        <defs>
+            <g id="rh-brand-mark">
+                <rect width="200" height="200" rx="32" fill="#000000"/>
+                <circle cx="100" cy="100" r="68" fill="rgba(225, 29, 42, 0.2)" filter="blur(16px)"/>
+                <path d="M95 52 H118 V89 H143 V52 H166 V148 H143 V110 H118 V148 H95 Z" fill="#ffffff" />
+                <path d="M36 52 H84 C104 52 116 63 116 80 C116 93 107 103 93 106 L124 148 H97 L68 108 H59 V148 H36 V75 H59 V89 H81 C90 89 94 85 94 79.5 C94 74 90 70 81 70 H36 Z" 
+                      fill="#000000" stroke="#000000" stroke-width="11" stroke-linejoin="round" />
+                <path d="M36 52 H84 C104 52 116 63 116 80 C116 93 107 103 93 106 L124 148 H97 L68 108 H59 V148 H36 V75 H59 V89 H81 C90 89 94 85 94 79.5 C94 74 90 70 81 70 H36 Z" 
+                      fill="#e11d2a" />
+            </g>
+
+            <g id="cover-grust2">
+                <rect width="200" height="200" fill="#07070b"/>
+                <radialGradient id="g2Grad" cx="50%" cy="35%" r="65%">
+                    <stop offset="0%" stop-color="#e11d2a" stop-opacity="0.55"/>
+                    <stop offset="60%" stop-color="#181824" stop-opacity="0.9"/>
+                    <stop offset="100%" stop-color="#050508" stop-opacity="1"/>
+                </radialGradient>
+                <rect width="200" height="200" fill="url(#g2Grad)"/>
+                <path d="M100 148 C100 148 48 112 48 74 C48 54 64 42 80 42 C92 42 100 50 100 58 C100 50 108 42 120 42 C136 42 152 54 152 74 C152 112 100 148 100 148 Z" 
+                      fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="3.5" stroke-dasharray="10 4"/>
+                <text x="16" y="28" fill="#a1a1aa" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" letter-spacing="2">OG BUDA</text>
+                <text x="16" y="182" fill="#ffffff" font-family="Unbounded, sans-serif" font-size="15" font-weight="800">ГРУСТЬ 2</text>
+            </g>
+
+            <g id="cover-zamer">
+                <rect width="200" height="200" fill="#060911"/>
+                <radialGradient id="zamerGrad" cx="50%" cy="45%" r="65%">
+                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.38"/>
+                    <stop offset="55%" stop-color="#e11d2a" stop-opacity="0.28"/>
+                    <stop offset="100%" stop-color="#05060a" stop-opacity="1"/>
+                </radialGradient>
+                <rect width="200" height="200" fill="url(#zamerGrad)"/>
+                <polygon points="100,30 138,95 100,145 62,95" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.8)" stroke-width="2.5"/>
+                <polygon points="100,46 124,95 100,130 76,95" fill="rgba(225,29,42,0.3)" stroke="#e11d2a" stroke-width="1.5"/>
+                <text x="16" y="28" fill="#cbd5e1" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" letter-spacing="1.5">HERONWATER</text>
+                <text x="16" y="182" fill="#ffffff" font-family="Unbounded, sans-serif" font-size="17" font-weight="900">ЗАМЕР</text>
+            </g>
+
+            <g id="cover-sner">
+                <rect width="200" height="200" fill="#080709"/>
+                <radialGradient id="snerGrad" cx="65%" cy="30%" r="70%">
+                    <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.45"/>
+                    <stop offset="60%" stop-color="#181216" stop-opacity="0.95"/>
+                    <stop offset="100%" stop-color="#050507" stop-opacity="1"/>
+                </radialGradient>
+                <rect width="200" height="200" fill="url(#snerGrad)"/>
+                <rect x="86" y="48" width="28" height="52" rx="14" fill="none" stroke="#ffffff" stroke-width="3"/>
+                <path d="M74 82 C74 104 126 104 126 82" fill="none" stroke="#e11d2a" stroke-width="3"/>
+                <line x1="100" y1="100" x2="100" y2="138" stroke="#ffffff" stroke-width="3"/>
+                <line x1="78" y1="138" x2="122" y2="138" stroke="#ffffff" stroke-width="3"/>
+                <text x="16" y="28" fill="#a1a1aa" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" letter-spacing="1.5">С.Н.Е.Р // 6:00</text>
+                <text x="16" y="182" fill="#ffffff" font-family="Unbounded, sans-serif" font-size="12" font-weight="800">НА МИКРО ВЕЧЕН</text>
+            </g>
+        </defs>
+    </svg>
+
+    <canvas id="bg-canvas"></canvas>
+    <div class="ambient-haze"></div>
+    <div class="film-grain"></div>
+
+    <!-- ENTRY GATE OVERLAY -->
+    <div id="enter-overlay" role="button" tabindex="0" aria-label="Войти" onclick="enterProfile()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();enterProfile();}">
+        <div class="flex flex-col items-center text-center px-6">
+            <div class="w-16 h-16 mb-5 rounded-2xl border border-white/10 p-0.5 shadow-2xl rh-logo-glow">
+                <svg viewBox="0 0 200 200" class="w-full h-full rounded-[14px]">
+                    <use href="#rh-brand-mark"></use>
+                </svg>
+            </div>
+            <div class="flex items-center gap-2.5 mb-2">
+                <span class="w-2 h-2 rounded-full bg-[#e11d2a] animate-ping"></span>
+                <span class="font-aver text-3xl sm:text-4xl font-extrabold tracking-tight text-white">AweR</span>
+            </div>
+            <p class="font-mono-code text-xs text-zinc-400 tracking-[0.2em] uppercase mt-1">[ click to enter // AweR ]</p>
+            <p class="font-mono-code text-[10px] text-zinc-600 tracking-widest mt-5 uppercase">
+                Грусть 2 (01:44) ➔ Замер (01:39) ➔ На Микро Вечен (04:45)
+            </p>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" role="status" aria-live="polite" style="top: calc(env(safe-area-inset-top, 0px) + 20px); max-width: calc(100vw - 24px);" class="fixed left-1/2 -translate-x-1/2 z-[80] pointer-events-none opacity-0 -translate-y-3 transition-all duration-300 bg-zinc-950/95 border border-white/10 text-white px-4 py-2 rounded-xl shadow-2xl flex items-center gap-2.5 font-mono-code text-xs">
+        <span class="w-2 h-2 rounded-full bg-[#e11d2a]"></span>
+        <span id="toast-message">ЗАКАЗАТЬ.</span>
+    </div>
+
+    <!-- MAIN BENTO CONTAINER -->
+    <div class="w-full max-w-[580px] my-auto z-10">
+        <main id="bento-shell" class="rounded-[28px] shell-pre-reveal p-3 sm:p-4 space-y-3">
+
+            <!-- 1. TOP PROFILE HERO MODULE (ИДЕАЛЬНО ПЛАВНЫЙ БАННЕР НА FUNPAY: ЗАКАЗАТЬ. ТАКОЕ. КЛИК.) -->
+            <section id="stagger-1" class="stagger-item bento-module rounded-[22px] overflow-hidden">
+                <a href="https://funpay.com/users/21727329/" target="_blank" rel="noopener noreferrer" class="relative h-32 sm:h-36 w-full bg-[#060609] cursor-pointer overflow-hidden group block" title="ЗАКАЗАТЬ. ТАКОЕ. КЛИК. — Перейти на FunPay">
+                    <canvas id="buda-banner-canvas" class="w-full h-full block"></canvas>
+
+                    <!-- Плавные CSS-слова поверх Canvas без рывков -->
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none pb-2">
+                        <span class="banner-word-item active">ЗАКАЗАТЬ.</span>
+                        <span class="banner-word-item">ТАКОЕ.</span>
+                        <span class="banner-word-item">КЛИК.</span>
+                    </div>
+
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#0e0e13] via-[#0e0e13]/20 to-transparent pointer-events-none"></div>
+                    <div class="absolute bottom-2 right-3 opacity-90 group-hover:opacity-100 transition-all duration-300 font-mono-code text-[10px] font-bold text-zinc-100 bg-black/80 group-hover:bg-[#e11d2a] px-2.5 py-1 rounded-md border border-white/15 group-hover:border-[#e11d2a] pointer-events-none flex items-center gap-1.5 shadow-lg">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#e11d2a] group-hover:bg-white animate-pulse"></span>
+                        <span>ЗАКАЗАТЬ. ТАКОЕ. КЛИК. ↗</span>
+                    </div>
+                </a>
+
+                <div class="px-4 sm:px-5 pb-4 -mt-11 relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+                    <div class="flex items-end gap-3.5 min-w-0">
+                        <div class="relative flex-shrink-0">
+                            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden avatar-frame bg-[#050507] p-0.5">
+                                <img id="avatar-img" src="1.png" alt="AweR" width="96" height="96" decoding="async" class="w-full h-full rounded-[14px]" />
+                            </div>
+                            <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#e11d2a] ring-4 ring-[#0e0e13]"></span>
+                        </div>
+
+                        <div class="pb-0.5 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <h1 class="font-aver text-2xl sm:text-3xl font-black aver-chrome-title leading-none">AweR</h1>
+                                <span class="w-4 h-4 rounded-full bg-[#e11d2a]/20 border border-[#e11d2a]/50 flex items-center justify-center text-[#e11d2a]">
+                                    <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                                    </svg>
+                                </span>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
+                                <button type="button" onclick="copyToClipboard('awerendx', '@awerendx скопирован')" class="font-mono-code text-xs text-zinc-400 hover:text-white transition">
+                                    @awerendx
+                                </button>
+                                <span class="text-zinc-700">•</span>
+                                <span class="font-mono-code text-[10px] px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.07] text-zinc-300">
+                                    UID #001
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="https://redhaze.ru" target="_blank" rel="noopener noreferrer" class="h-9 px-3.5 rounded-xl bg-white/[0.03] hover:bg-[#e11d2a]/20 border border-white/[0.08] hover:border-[#e11d2a]/50 flex items-center gap-2 transition self-start sm:self-end group">
+                        <svg viewBox="0 0 200 200" class="w-4 h-4 rounded-sm rh-logo-glow">
+                            <use href="#rh-brand-mark"></use>
+                        </svg>
+                        <span class="font-mono-code text-[11px] text-zinc-200 group-hover:text-white font-semibold">redhaze.ru</span>
+                    </a>
+                </div>
+
+                <div class="px-4 sm:px-5 pb-3.5 pt-2 border-t border-white/[0.04] grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                    <button type="button" onclick="switchProfileTab('all', this)" class="nav-tab-btn active py-1.5 px-2 rounded-xl font-mono-code text-[10px] font-semibold text-center truncate">01 // ВСЕ</button>
+                    <button type="button" onclick="switchProfileTab('status', this)" class="nav-tab-btn py-1.5 px-2 rounded-xl font-mono-code text-[10px] font-semibold text-center truncate">02 // ПРОЕКТ</button>
+                    <button type="button" onclick="switchProfileTab('music', this)" class="nav-tab-btn py-1.5 px-2 rounded-xl font-mono-code text-[10px] font-semibold text-center truncate">03 // ПЛЕЕР</button>
+                    <button type="button" onclick="switchProfileTab('links', this)" class="nav-tab-btn py-1.5 px-2 rounded-xl font-mono-code text-[10px] font-semibold text-center truncate">04 // ССЫЛКИ</button>
+                </div>
+            </section>
+
+            <!-- 2. БЛОК ПРОЕКТА И СТАТУСА (LOVE + FOUNDER/CEO + redhaze.ru + MINDSET БЕЗ КАВЫЧЕК) -->
+            <section id="stagger-2" data-tab-group="status" class="stagger-item grid grid-cols-1 sm:grid-cols-12 gap-3">
+                <a href="https://redhaze.ru" target="_blank" rel="noopener noreferrer" class="sm:col-span-7 bento-module project-showcase-card rounded-[22px] p-4 flex items-center justify-between gap-3.5 group relative overflow-hidden">
+                    <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-[#e11d2a]/20 blur-2xl pointer-events-none group-hover:bg-[#e11d2a]/35 transition"></div>
+
+                    <div class="flex items-center gap-3.5 min-w-0 relative z-10">
+                        <div class="w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0 border border-[#e11d2a]/40 shadow-[0_0_20px_rgba(225,29,42,0.35)] group-hover:scale-105 transition duration-300 bg-black">
+                            <svg viewBox="0 0 200 200" class="w-full h-full">
+                                <use href="#rh-brand-mark"></use>
+                            </svg>
+                        </div>
+
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#e11d2a] animate-pulse"></span>
+                                <span class="font-mono-code text-[9px] uppercase tracking-[0.18em] text-red-400 font-semibold">
+                                    LOVE
+                                </span>
+                                <span class="font-mono-code text-[8px] px-1.5 py-0.5 rounded bg-[#e11d2a]/20 border border-[#e11d2a]/40 text-red-200 font-bold">
+                                    FOUNDER/CEO
+                                </span>
+                            </div>
+                            <p class="text-[13px] sm:text-[14px] font-extrabold tracking-tight leading-snug">
+                                <span class="text-[#ff3b47] underline decoration-[#e11d2a]/50 underline-offset-4 group-hover:text-red-300 transition">redhaze.ru</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="w-8 h-8 rounded-xl bg-white/[0.04] group-hover:bg-[#e11d2a] border border-white/10 group-hover:border-[#e11d2a] flex items-center justify-center text-zinc-400 group-hover:text-white transition duration-300 flex-shrink-0 relative z-10 shadow-md">
+                        <svg class="w-4 h-4 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M17 7H8M17 7V16"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <div class="sm:col-span-5 bento-module rounded-[22px] p-4 flex flex-col justify-center">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="font-mono-code text-[9px] uppercase tracking-[0.16em] text-zinc-500 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#e11d2a]"></span>
+                            MINDSET
+                        </span>
+                        <span class="font-mono-code text-[9px] px-1.5 py-0.5 rounded bg-white/[0.03] border border-white/[0.06] text-zinc-400">SOLO</span>
+                    </div>
+                    <p class="text-xs sm:text-[13px] font-bold text-zinc-100 leading-snug">
+                        всё чаще двигаюсь в соло
+                    </p>
+                </div>
+            </section>
+
+            <!-- 3. ПЛЕЕР + SPOTIFY LIVE SYNCED LYRICS -->
+            <section id="stagger-3" data-tab-group="music" class="stagger-item bento-module rounded-[22px] p-4 space-y-3.5">
+
+                <div class="flex items-center gap-3.5">
+                    <div class="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border border-white/10 bg-black flex-shrink-0 shadow-lg">
+                        <svg viewBox="0 0 200 200" class="w-full h-full">
+                            <use id="active-cover-use" href="#cover-grust2"></use>
+                        </svg>
+                        <button type="button" id="play-toggle-btn" aria-label="Пауза" onclick="togglePlayback()" class="absolute inset-0 bg-black/45 hover:bg-black/25 flex items-center justify-center transition group">
+                            <div class="w-9 h-9 rounded-full bg-[#e11d2a] text-white flex items-center justify-center shadow-[0_0_16px_rgba(225,29,42,0.8)] group-hover:scale-105 transition">
+                                <svg id="play-icon" class="w-4 h-4 hidden" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                                <svg id="pause-icon" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                                </svg>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-2 mb-0.5">
+                            <span id="lyric-mode-badge" class="font-mono-code text-[9px] uppercase tracking-wider text-[#e11d2a] font-semibold truncate">
+                                DROP 01:44 • OG BUDA — ГРУСТЬ 2
+                            </span>
+                            <span id="bass-db-meter" class="font-mono-code text-[9px] text-zinc-500 flex-shrink-0">
+                                BASS: 0.0 dB
+                            </span>
+                        </div>
+
+                        <h3 id="deck-track-title" class="text-sm sm:text-base font-bold text-white truncate">
+                            OG Buda — Грусть 2
+                        </h3>
+                        <p id="deck-track-sub" class="font-mono-code text-[10px] text-zinc-400 truncate mb-2">
+                            Имбовый момент с 01:44 • Полный трек 02:24
+                        </p>
+
+                        <canvas id="visualizer-canvas" class="w-full h-5 block"></canvas>
+                    </div>
+                </div>
+
+                <!-- SPOTIFY SYNCED LYRICS BOX -->
+                <div class="rounded-2xl bg-[#08080b]/90 border border-white/[0.06] p-3 relative overflow-hidden">
+                    <div class="flex items-center justify-between gap-2 pb-2 mb-1 border-b border-white/[0.05] relative z-20">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-2 h-2 rounded-full bg-[#e11d2a] animate-pulse"></span>
+                            <span class="font-mono-code text-[9px] uppercase tracking-[0.16em] text-zinc-300 font-bold truncate">
+                                SPOTIFY SYNCED LYRICS
+                            </span>
+                            <span class="font-mono-code text-[9px] text-zinc-500 hidden sm:inline">
+                                • клик по строке = перемотка
+                            </span>
+                        </div>
+                        <button type="button" onclick="jumpToKeyMoment(event)" id="key-jump-btn" class="cursor-pointer font-mono-code text-[10px] px-2.5 py-1 rounded-lg bg-[#e11d2a]/20 hover:bg-[#e11d2a] active:scale-95 border border-[#e11d2a]/50 text-red-200 hover:text-white transition flex-shrink-0 shadow-sm" title="Переключить сразу на дроп-момент">
+                            ↺ DROP 01:44
+                        </button>
+                    </div>
+
+                    <div id="spotify-lyrics-viewport" class="space-y-1 py-6"></div>
+                </div>
+
+                <!-- Таймлайн и пониженная начальная громкость (0.25) -->
+                <div class="space-y-1.5">
+                    <div id="timeline-hit" class="py-2 -my-2 cursor-pointer" role="slider" aria-label="Позиция в треке" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72">
+                        <div id="timeline-bar" class="relative h-1.5 w-full bg-zinc-900 border border-white/[0.05] rounded-full overflow-hidden">
+                            <div id="timeline-fill" class="h-full bg-gradient-to-r from-[#991b1b] via-[#e11d2a] to-[#f43f5e] rounded-full" style="width: 72%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between font-mono-code text-[10px] text-zinc-400">
+                        <div class="flex items-center gap-1.5">
+                            <span id="current-time" class="text-zinc-100 font-semibold">01:44</span>
+                            <span class="text-zinc-600">/</span>
+                            <span id="total-time">02:24</span>
+                            <span id="transition-indicator" class="text-[9px] text-red-400/90 ml-1 hidden sm:inline">
+                                [дроп с 01:44 ➔ Замер 01:39]
+                            </span>
+                        </div>
+
+                        <div id="volume-wrap" class="flex items-center gap-2">
+                            <span class="text-[9px] text-zinc-500">VOL</span>
+                            <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.25" class="w-16" aria-label="Громкость" oninput="setVolume(this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- СПИСОК АУДИО-ДОРОЖЕК (КЛИК НА ПЕСНЮ = С НАЧАЛА 00:00, КЛИК НА DROP = НА ДРОП) -->
+                <div class="pt-2 border-t border-white/[0.05] space-y-1.5">
+                    <div class="flex flex-wrap items-center justify-between gap-x-3 px-1 mb-1">
+                        <span class="font-mono-code text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">
+                            Аудио-дорожки профиля (3)
+                        </span>
+                        <span class="font-mono-code text-[9px] text-zinc-500">
+                            клик по песне = с начала (00:00)
+                        </span>
+                    </div>
+
+                    <!-- Дорожка 01: OG Buda — Грусть 2 -->
+                    <div id="track-row-grust2" role="button" tabindex="0" onclick="selectAlbumTrack('OUTRO_GRUST2', true, 'start')" class="track-row active-track rounded-xl p-2.5 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="font-mono-code text-[10px] text-zinc-500 w-4 text-center">01</span>
+                            <div class="w-9 h-9 rounded-lg overflow-hidden border border-white/10 flex-shrink-0">
+                                <svg viewBox="0 0 200 200" class="w-full h-full"><use href="#cover-grust2"></use></svg>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold text-white truncate">OG Buda — Грусть 2</p>
+                                <p class="font-mono-code text-[10px] text-zinc-400 truncate">С начала 00:00 • Дроп с 01:44 ("Не говори что любишь меня...")</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <button type="button" onclick="event.stopPropagation(); selectAlbumTrack('OUTRO_GRUST2', true, 'drop')" class="cursor-pointer whitespace-nowrap font-mono-code text-[10px] px-2 py-0.5 rounded bg-red-500/15 hover:bg-red-500/35 active:scale-95 border border-red-500/30 text-red-300 hover:text-white transition" title="Включить сразу с дропа 01:44">
+                                DROP 01:44 • 02:24
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Дорожка 02: Heronwater — Замер -->
+                    <div id="track-row-zamer" role="button" tabindex="0" onclick="selectAlbumTrack('ZAMER_MAIN', true, 'start')" class="track-row rounded-xl p-2.5 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="font-mono-code text-[10px] text-zinc-500 w-4 text-center">02</span>
+                            <div class="w-9 h-9 rounded-lg overflow-hidden border border-white/10 flex-shrink-0">
+                                <svg viewBox="0 0 200 200" class="w-full h-full"><use href="#cover-zamer"></use></svg>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold text-white truncate">Heronwater — Замер</p>
+                                <p class="font-mono-code text-[10px] text-zinc-400 truncate">С начала 00:00 • Дроп с 01:39 ("Деньги, слава, сорт...")</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <button type="button" onclick="event.stopPropagation(); selectAlbumTrack('ZAMER_MAIN', true, 'drop')" class="cursor-pointer whitespace-nowrap font-mono-code text-[10px] px-2 py-0.5 rounded bg-white/[0.04] hover:bg-red-500/30 active:scale-95 border border-white/10 hover:border-red-500/40 text-zinc-300 hover:text-white transition" title="Включить сразу с дропа 01:39">
+                                DROP 01:39 • 02:14
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Дорожка 03: OG Buda — На Микро Вечен -->
+                    <div id="track-row-sner" role="button" tabindex="0" onclick="selectAlbumTrack('MIKRO_444', true, 'start')" class="track-row rounded-xl p-2.5 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="font-mono-code text-[10px] text-zinc-500 w-4 text-center">03</span>
+                            <div class="w-9 h-9 rounded-lg overflow-hidden border border-white/10 flex-shrink-0">
+                                <svg viewBox="0 0 200 200" class="w-full h-full"><use href="#cover-sner"></use></svg>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold text-white truncate">OG Buda — На Микро Вечен</p>
+                                <p class="font-mono-code text-[10px] text-zinc-400 truncate">С начала 00:00 • Дроп с 04:45 ("Я всё чаще двигаюсь в соло...")</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <button type="button" onclick="event.stopPropagation(); selectAlbumTrack('MIKRO_444', true, 'drop')" class="cursor-pointer whitespace-nowrap font-mono-code text-[10px] px-2 py-0.5 rounded bg-white/[0.04] hover:bg-red-500/30 active:scale-95 border border-white/10 hover:border-red-500/40 text-zinc-300 hover:text-white transition" title="Включить сразу с дропа 04:45">
+                                DROP 04:45 • 06:00
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. SOCIAL LINKS BENTO GRID -->
+            <section id="stagger-4" data-tab-group="links" class="stagger-item grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <a href="https://t.me/awerendx" target="_blank" rel="noopener noreferrer" class="bento-module rounded-2xl p-3.5 flex flex-col justify-between group hover:border-[#2AABEE]/50">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-zinc-300 group-hover:text-[#2AABEE] transition">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                            </svg>
+                        </div>
+                        <span class="font-mono-code text-[9px] text-zinc-500 group-hover:text-zinc-300">TG ↗</span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-white block">Telegram</span>
+                        <span class="font-mono-code text-[10px] text-zinc-400 truncate block">@awerendx</span>
+                    </div>
+                </a>
+
+                <button type="button" onclick="copyToClipboard('awerendx', 'Discord: awerendx скопирован')" class="bento-module rounded-2xl p-3.5 flex flex-col justify-between text-left group hover:border-[#5865F2]/50">
+                    <div class="flex items-center justify-between mb-2 w-full">
+                        <div class="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-zinc-300 group-hover:text-[#5865F2] transition">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/>
+                            </svg>
+                        </div>
+                        <span class="font-mono-code text-[9px] text-zinc-500 group-hover:text-white">COPY</span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-white block">Discord</span>
+                        <span class="font-mono-code text-[10px] text-zinc-400 truncate block">awerendx</span>
+                    </div>
+                </button>
+
+                <a href="https://steamcommunity.com/id/awerendx/" target="_blank" rel="noopener noreferrer" class="bento-module rounded-2xl p-3.5 flex flex-col justify-between group hover:border-white/25">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-zinc-300 group-hover:text-white transition">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0z"/>
+                            </svg>
+                        </div>
+                        <span class="font-mono-code text-[9px] text-zinc-500 group-hover:text-zinc-300">STEAM ↗</span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-white block">Steam</span>
+                        <span class="font-mono-code text-[10px] text-zinc-400 truncate block">id/awerendx</span>
+                    </div>
+                </a>
+
+                <a href="https://open.spotify.com/user/316cx273wbmfcqnppdxi5celixh4" target="_blank" rel="noopener noreferrer" class="bento-module rounded-2xl p-3.5 flex flex-col justify-between group hover:border-[#1DB954]/50">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-zinc-300 group-hover:text-[#1DB954] transition">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+                            </svg>
+                        </div>
+                        <span class="font-mono-code text-[9px] text-zinc-500 group-hover:text-zinc-300">PLAY ↗</span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-white block">Spotify</span>
+                        <span class="font-mono-code text-[10px] text-zinc-400 truncate block">AweR // плейлист</span>
+                    </div>
+                </a>
+            </section>
+
+            <!-- 5. FOOTER (ЛЕВЫЙ УГОЛ "Авер", ПРАВЫЙ УГОЛ "made by awerendx") -->
+            <footer class="px-2 pt-1 flex items-center justify-between font-mono-code text-[10px] text-zinc-400">
+                <span class="tracking-wider font-semibold text-zinc-300">Авер</span>
+                <span class="text-zinc-500">made by awerendx</span>
+            </footer>
+
+        </main>
+    </div>
+
+    <script>
+        const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); /* iPadOS маскируется под Mac */
+        const IS_MOBILE = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || IS_IOS;
+        const PERF_LITE = IS_MOBILE || window.matchMedia('(max-width: 640px)').matches;
+
+        /* Полифилл roundRect: в старых Safari его нет, и без него падали аватар-заглушка и визуализатор */
+        if (window.CanvasRenderingContext2D && !CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+                r = Math.max(0, Math.min(Array.isArray(r) ? (r[0] || 0) : (r || 0), w / 2, h / 2));
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+            };
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        /* 1. РЕЗЕРВНАЯ ОТРИСОВКА ПОРТРЕТА В ДЖЕРСИ bwin */
+        function renderExactAvatarFallback() {
+            const c = document.createElement('canvas');
+            c.width = 500;
+            c.height = 500;
+            const ctx = c.getContext('2d');
+
+            ctx.fillStyle = '#070709';
+            ctx.fillRect(0, 0, 500, 500);
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(135, 500);
+            ctx.lineTo(145, 225);
+            ctx.quadraticCurveTo(155, 175, 205, 170);
+            ctx.lineTo(295, 170);
+            ctx.quadraticCurveTo(335, 180, 342, 235);
+            ctx.lineTo(350, 500);
+            ctx.closePath();
+            ctx.clip();
+
+            ctx.fillStyle = '#0b0b0e';
+            ctx.fillRect(120, 160, 250, 340);
+
+            [160, 205, 250, 295].forEach((sx) => {
+                const sg = ctx.createLinearGradient(sx, 170, sx + 22, 480);
+                sg.addColorStop(0, '#e1251b');
+                sg.addColorStop(0.5, '#b81812');
+                sg.addColorStop(1, '#1a0404');
+                ctx.fillStyle = sg;
+                ctx.fillRect(sx, 170, 22, 330);
+            });
+
+            ctx.strokeStyle = '#e1251b';
+            ctx.lineWidth = 4.5;
+            for (let s = 0; s < 3; s++) {
+                ctx.beginPath();
+                ctx.moveTo(158 + s * 8, 174);
+                ctx.lineTo(144 + s * 7, 295);
+                ctx.stroke();
+            }
+
+            const vignette = ctx.createRadialGradient(250, 270, 30, 250, 310, 210);
+            vignette.addColorStop(0, 'rgba(0,0,0,0.1)');
+            vignette.addColorStop(0.7, 'rgba(0,0,0,0.55)');
+            vignette.addColorStop(1, 'rgba(0,0,0,0.92)');
+            ctx.fillStyle = vignette;
+            ctx.fillRect(120, 160, 250, 340);
+
+            ctx.save();
+            ctx.translate(250, 308);
+            ctx.rotate(0.06);
+            ctx.font = '900 40px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            const bwinGrad = ctx.createLinearGradient(-60, 0, 60, 0);
+            bwinGrad.addColorStop(0, '#27272a');
+            bwinGrad.addColorStop(0.35, '#a1a1aa');
+            bwinGrad.addColorStop(0.65, '#ffffff');
+            bwinGrad.addColorStop(1, '#f4f4f6');
+            ctx.fillStyle = bwinGrad;
+            ctx.fillText('bwin', 0, 0);
+            ctx.restore();
+            ctx.restore();
+
+            ctx.fillStyle = '#050507';
+            ctx.beginPath();
+            ctx.arc(260, 145, 38, 0, Math.PI * 2);
+            ctx.fill();
+
+            const capGrad = ctx.createLinearGradient(215, 80, 305, 130);
+            capGrad.addColorStop(0, '#1e2536');
+            capGrad.addColorStop(1, '#0d1017');
+            ctx.fillStyle = capGrad;
+            ctx.beginPath();
+            ctx.moveTo(216, 122);
+            ctx.quadraticCurveTo(222, 76, 266, 78);
+            ctx.quadraticCurveTo(304, 80, 306, 126);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#141824';
+            ctx.beginPath();
+            ctx.moveTo(218, 116);
+            ctx.quadraticCurveTo(186, 120, 182, 129);
+            ctx.quadraticCurveTo(212, 132, 246, 124);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#a89f9a';
+            ctx.beginPath();
+            ctx.roundRect(228, 178, 28, 22, 7);
+            ctx.fill();
+
+            [
+                { x: 262, y: 210, r: 28, a: 0.85 },
+                { x: 276, y: 226, r: 32, a: 0.72 },
+                { x: 250, y: 232, r: 25, a: 0.60 },
+                { x: 268, y: 246, r: 27, a: 0.45 }
+            ].forEach(sp => {
+                const smG = ctx.createRadialGradient(sp.x, sp.y, 2, sp.x, sp.y, sp.r);
+                smG.addColorStop(0, `rgba(240, 246, 255, ${sp.a})`);
+                smG.addColorStop(0.55, `rgba(195, 210, 230, ${sp.a * 0.55})`);
+                smG.addColorStop(1, 'rgba(10, 12, 16, 0)');
+                ctx.fillStyle = smG;
+                ctx.beginPath();
+                ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            return c.toDataURL('image/png');
+        }
+
+        /* 2. ИДЕАЛЬНО ПЛАВНЫЙ БАННЕР БЕЗ БАГОВ */
+        const bannerCanvas = document.getElementById('buda-banner-canvas');
+        const bannerCtx = bannerCanvas.getContext('2d');
+        let smokeParticles = [];
+        let lastBannerTs = 0;
+        let currentBassEnergy = 0;
+        let smoothBassEnergy = 0;
+
+        function resizeBannerCanvas() {
+            /* clientWidth — реальный размер без учёта transform/scale анимации появления */
+            const p = bannerCanvas.parentElement;
+            const w = Math.round(p.clientWidth) || 540;
+            const h = Math.round(p.clientHeight) || 144;
+            if (bannerCanvas.width !== w) bannerCanvas.width = w;
+            if (bannerCanvas.height !== h) bannerCanvas.height = h;
+        }
+        window.addEventListener('resize', resizeBannerCanvas);
+        if (window.ResizeObserver) new ResizeObserver(resizeBannerCanvas).observe(bannerCanvas.parentElement);
+
+        for (let i = 0; i < (PERF_LITE ? 12 : 24); i++) {
+            smokeParticles.push({
+                x: Math.random() * 580,
+                y: Math.random() * 150,
+                r: Math.random() * 34 + 18,
+                vx: (Math.random() - 0.5) * 0.28,
+                vy: -(Math.random() * 0.18 + 0.06),
+                a: Math.random() * 0.1 + 0.03
+            });
+        }
+
+        function initSmoothBannerWords() {
+            const wordEls = document.querySelectorAll('.banner-word-item');
+            if (!wordEls.length) return;
+            let currentWordIdx = 0;
+            setInterval(() => {
+                wordEls[currentWordIdx].classList.remove('active');
+                currentWordIdx = (currentWordIdx + 1) % wordEls.length;
+                wordEls[currentWordIdx].classList.add('active');
+            }, 2400);
+        }
+
+        function animateBudaBanner(ts) {
+            requestAnimationFrame(animateBudaBanner);
+            if (PERF_LITE) {                       /* на телефонах хватает 30 fps */
+                if (ts - lastBannerTs < 32) return;
+                lastBannerTs = ts;
+            }
+            const w = bannerCanvas.width;
+            const h = bannerCanvas.height;
+            const t = ts * 0.001;
+
+            smoothBassEnergy += (currentBassEnergy - smoothBassEnergy) * 0.08;
+
+            bannerCtx.fillStyle = '#060609';
+            bannerCtx.fillRect(0, 0, w, h);
+
+            const orb1X = w * 0.5 + Math.sin(t * 0.65) * (w * 0.28);
+            const orb1Y = h * 0.45 + Math.cos(t * 0.5) * (h * 0.2);
+            const grad1 = bannerCtx.createRadialGradient(orb1X, orb1Y, 4, orb1X, orb1Y, w * 0.48);
+            grad1.addColorStop(0, `rgba(225, 29, 42, ${0.32 + smoothBassEnergy * 0.22})`);
+            grad1.addColorStop(0.55, 'rgba(136, 19, 55, 0.12)');
+            grad1.addColorStop(1, 'rgba(6, 6, 9, 0)');
+            bannerCtx.fillStyle = grad1;
+            bannerCtx.fillRect(0, 0, w, h);
+
+            const orb2X = w * 0.5 - Math.sin(t * 0.45) * (w * 0.3);
+            const grad2 = bannerCtx.createRadialGradient(orb2X, h * 0.6, 4, orb2X, h * 0.6, w * 0.4);
+            grad2.addColorStop(0, `rgba(244, 63, 94, ${0.18 + smoothBassEnergy * 0.16})`);
+            grad2.addColorStop(1, 'rgba(6, 6, 9, 0)');
+            bannerCtx.fillStyle = grad2;
+            bannerCtx.fillRect(0, 0, w, h);
+
+            bannerCtx.beginPath();
+            bannerCtx.strokeStyle = `rgba(225, 29, 42, ${0.24 + smoothBassEnergy * 0.25})`;
+            bannerCtx.lineWidth = 1.5;
+            for (let x = 0; x <= w; x += 5) {
+                const waveY = h * 0.54
+                    + Math.sin(x * 0.022 + t * 2.2) * (6 + smoothBassEnergy * 14)
+                    + Math.cos(x * 0.012 - t * 1.4) * 4;
+                if (x === 0) bannerCtx.moveTo(x, waveY);
+                else bannerCtx.lineTo(x, waveY);
+            }
+            bannerCtx.stroke();
+
+            smokeParticles.forEach(sp => {
+                sp.x += sp.vx;
+                sp.y += sp.vy;
+                if (sp.y < -40) sp.y = h + 30;
+                if (sp.x < -40) sp.x = w + 30;
+                if (sp.x > w + 40) sp.x = -30;
+
+                const sg = bannerCtx.createRadialGradient(sp.x, sp.y, 2, sp.x, sp.y, sp.r);
+                sg.addColorStop(0, `rgba(225, 230, 240, ${sp.a})`);
+                sg.addColorStop(1, 'rgba(6, 6, 9, 0)');
+                bannerCtx.fillStyle = sg;
+                bannerCtx.beginPath();
+                bannerCtx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2);
+                bannerCtx.fill();
+            });
+        }
+
+        /* 3. ПОЛНЫЕ ТЕКСТЫ И ТАЙМИНГИ ВСЕХ 3 ПЕСЕН */
+        const TRACK_CONFIG = {
+            OUTRO_GRUST2: {
+                title: 'OG Buda — Грусть 2',
+                sub: 'Имбовый момент с 01:44 • Полный трек 02:24',
+                badge: 'DROP 01:44 • OG BUDA — ГРУСТЬ 2',
+                indicator: '[дроп 01:44 ➔ Замер 01:39]',
+                jumpLabel: '↺ DROP 01:44',
+                defaultStart: 104.0,
+                totalDuration: 144,
+                leadOffset: 0.0,
+                cover: '#cover-grust2',
+                cues: [
+                    { t: 0.0,   end: 2.2,   text: '— Ну, не знаю' },
+                    { t: 2.2,   end: 6.8,   text: '— Ну, там ещё пацанов пять-шесть со мной будет, затусуемся у тебя на хате, посидим, побухаем' },
+                    { t: 6.8,   end: 9.2,   text: '— Ну только ты один, ладно?' },
+                    { t: 9.2,   end: 11.8,  text: '— Давай тебя по кругу пустим?' },
+                    { t: 11.8,  end: 13.6,  text: '— Прекрати, а' },
+                    { t: 13.6,  end: 19.3,  text: '— Чё "Прекрати"? Ну тебе же понравилось, ты говорила. Не, не, я буду с тобой встречаться всё равно, но…' },
+                    { t: 19.3,  end: 21.3,  text: 'Wex on the beat' },
+                    { t: 21.3,  end: 23.6,  text: 'Я так боюсь, что скоро хоронить бабулю' },
+                    { t: 23.6,  end: 25.9,  text: 'Бабки превратили меня в деда, я теперь сутулюсь' },
+                    { t: 25.9,  end: 28.4,  text: 'Боже, помоги нам, если существуешь' },
+                    { t: 28.4,  end: 31.2,  text: 'На мне и так большой вес, на хуй меня ещё грузишь? (Заебала)' },
+                    { t: 31.2,  end: 33.8,  text: 'Знаю, что слышишь мой голос щас и жёстко грустишь (Ха-ха)' },
+                    { t: 33.8,  end: 36.4,  text: 'Тот самый нежный Буда, которого любишь' },
+                    { t: 36.4,  end: 38.9,  text: 'Те самые три года, что ты не забудешь' },
+                    { t: 38.9,  end: 42.8,  text: 'Не факт даже, что ты счастлива будешь (Не думаю)' },
+                    { t: 42.8,  end: 45.8,  text: 'Е, е, я надеюсь, ты поднимешь cash, но знай, счастье не купишь' },
+                    { t: 45.8,  end: 48.4,  text: 'Бро, надеюсь ты поднимешь cash и меня не всучишь' },
+                    { t: 48.4,  end: 51.0,  text: 'Да, я делал много хуйни, бро, надеюсь, не судишь' },
+                    { t: 51.0,  end: 53.6,  text: 'Они такие: "Ты чё, бля, деньги рисуешь?"' },
+                    { t: 53.6,  end: 56.2,  text: 'Шампанское в руке — понял намёк про рискуешь?' },
+                    { t: 56.2,  end: 60.8,  text: 'Я убью типа с кем ты после меня замутишь' },
+                    { t: 60.8,  end: 63.8,  text: 'И я взорву спальню в которой без меня ночуешь' },
+                    { t: 63.8,  end: 65.8,  text: 'Растёт капитал, я на повышении' },
+                    { t: 65.8,  end: 68.2,  text: 'Мы так отдалились, но судьба требует приближения' },
+                    { t: 68.2,  end: 70.4,  text: 'Слишком сконцентрирован на умножении' },
+                    { t: 70.4,  end: 72.9,  text: 'Поэтому в отношениях потерпел поражение (Крах)' },
+                    { t: 72.9,  end: 75.2,  text: 'Эмоции через край, ты сыта Майотом' },
+                    { t: 75.2,  end: 77.8,  text: 'Из бокала через край (Пщ-щ), не понимаю намёков (А)' },
+                    { t: 77.8,  end: 80.4,  text: 'Ты пыталась сказать, между нами пропал импульс (Эй)' },
+                    { t: 80.4,  end: 85.0,  text: 'Клянусь, такими темпами я с этого двинусь (Сойду с ума)' },
+                    { t: 85.0,  end: 86.6,  text: 'Глубокая рана (А)' },
+                    { t: 86.6,  end: 88.6,  text: 'Всегда выгляжу сонно будто проснулся рано' },
+                    { t: 88.6,  end: 91.6,  text: 'Меня вдохновляет Луна — это моя соната (А-а-а)' },
+                    { t: 91.6,  end: 95.2,  text: 'Говоришь, я был нечестен с тобой, а сама то? (Ха, я всё знаю)' },
+                    { t: 95.2,  end: 96.8,  text: 'Последний мост гори (До тла)' },
+                    { t: 96.8,  end: 98.8,  text: 'В моих руках backwood, выглядит как палка Гарри' },
+                    { t: 98.8,  end: 101.4, text: 'Мысли о тебе вперемешку с запахом гари (О тебе)' },
+                    { t: 101.4, end: 104.3, text: 'С языками пламени мы танцевали танец' },
+                    { t: 104.3, end: 108.2, text: 'Мои глаза намокли, пф, е, — искренность' },
+                    { t: 108.2, end: 112.8, text: 'У тебя не будет никого реальней меня, ц, — истина' },
+                    { t: 112.8, end: 116.5, text: 'Любовь стала так холодна, будто ты изо льда' },
+                    { t: 116.5, end: 119.3, text: 'Раньше была дорога, щас не взял бы за дёшево' },
+                    { t: 119.3, end: 122.2, text: 'Меня поменяли тёлки, бабки, слава и Москва (Да)' },
+                    { t: 122.2, end: 128.0, text: 'Не говори что любишь меня — это громкие слова-а-а-а-а-а-а' },
+                    { t: 128.0, end: 135.5, text: 'VisaGangBeatz' },
+                    { t: 135.5, end: 144.0, text: "Scori say it's lit" }
+                ]
+            },
+            ZAMER_MAIN: {
+                title: 'Heronwater — Замер',
+                sub: 'Имбовый дроп с 01:39 • Полный трек 02:14',
+                badge: 'DROP 01:39 • HERONWATER — ЗАМЕР',
+                indicator: '[дроп с 01:39 • 02:14]',
+                jumpLabel: '↺ DROP 01:39',
+                defaultStart: 99.0,
+                totalDuration: 134,
+                leadOffset: 0.0,
+                cover: '#cover-zamer',
+                cues: [
+                    { t: 0.0,   end: 6.5,   text: 'У-у-у-у-у' },
+                    { t: 6.5,   end: 13.5,  text: 'У-у-у' },
+                    { t: 13.5,  end: 16.2,  text: 'Е, я видел много, как деньги меняли, людей меняли (А)' },
+                    { t: 16.2,  end: 19.0,  text: 'Видел лучших друзей, что со временем стали врагами (У-у-у)' },
+                    { t: 19.0,  end: 22.0,  text: 'Как влюбляются в бег те, кто всю жизнь от себя убегали (Е)' },
+                    { t: 22.0,  end: 25.2,  text: 'Я стал похожим на сердце, ведь всегда в окружении камер' },
+                    { t: 25.2,  end: 27.5,  text: 'Я хочу, чтобы мир замер, остановился (Я)' },
+                    { t: 27.5,  end: 30.0,  text: 'Хотя бы пять минут понять, что счастье здесь или близко (У-у)' },
+                    { t: 30.0,  end: 33.4,  text: 'Смотреть, как гаснут, кто выбрал зону комфорта, не риска' },
+                    { t: 33.4,  end: 36.8,  text: 'Серая пыль в глаза, что тушит в любом взгляде все искры (Все искры)' },
+                    { t: 36.8,  end: 38.8,  text: 'Окей, не пачкал совесть, ни имя (Я)' },
+                    { t: 38.8,  end: 41.2,  text: 'Деньги стали другими, рад (Я), что не сделали нас другими (Воу)' },
+                    { t: 41.2,  end: 43.6,  text: 'Герои драматургии, все в детстве были другие (Я)' },
+                    { t: 43.6,  end: 46.0,  text: 'Запомните нас попозже (Я) или, хотя бы, такими (Я)' },
+                    { t: 46.0,  end: 49.0,  text: '(Воу-воу) Только взял права, еду тише, молюсь, надеюсь (Е), там слышат' },
+                    { t: 49.0,  end: 51.5,  text: '(Воу-воу) Бокалы за тех, кого больше нет, и всегда выше (Я-я)' },
+                    { t: 51.5,  end: 54.2,  text: 'Если музыка не менялась (Я-я), то за ней стоит не личность (Воу)' },
+                    { t: 54.2,  end: 57.5,  text: 'Если вопрос встанет ребром, он будет решаться не в личке (Е)' },
+                    { t: 57.5,  end: 59.8,  text: 'Е, цели всегда выше суммы' },
+                    { t: 59.8,  end: 62.6,  text: 'Если не так, подумай, ради чего поднимать мулу?' },
+                    { t: 62.6,  end: 65.0,  text: 'Если в тебе нет духа, любые амбиции рухнут' },
+                    { t: 65.0,  end: 67.5,  text: 'Мне б их терпение столько ждать, когда протянут руку (У-у-у)' },
+                    { t: 67.5,  end: 71.2,  text: 'И ты не плёнка, никто не ждёт, чтобы ты проявился (Нет)' },
+                    { t: 71.2,  end: 73.2,  text: 'Смешал победу с игристым' },
+                    { t: 73.2,  end: 76.0,  text: 'И путь до Рая кажется адом, даже не тернистым (Не тернистым)' },
+                    { t: 76.0,  end: 80.5,  text: 'Много работал — культурно сделал выстрел' },
+                    { t: 80.5,  end: 83.2,  text: 'Е, потеря совести в Hennessy, часто ссорились в Вегасе' },
+                    { t: 83.2,  end: 86.2,  text: 'Но клятвы быть рядом, даже если сложности в бедности (Воу, е)' },
+                    { t: 86.2,  end: 88.8,  text: 'Я стал ещё жёстче в бесконечном поиске нежности' },
+                    { t: 88.8,  end: 91.5,  text: 'Любовь, что пропала во всех моих повестях без вести' },
+                    { t: 91.5,  end: 95.0,  text: 'Та музыка, что прошла проверку прочности, вечности (Вечности)' },
+                    { t: 95.0,  end: 97.0,  text: 'Сама знает свои достоинства внешности' },
+                    { t: 97.0,  end: 99.0,  text: 'Моя мечта звучит для них, как миф, как общество девственниц (Е, е, е, е)' },
+                    { t: 99.0,  end: 103.0, text: 'Бросаю мысли из них, хранится множество вне страниц (Odyssey)' },
+                    { t: 103.0, end: 108.0, text: 'Деньги, слава, сорт — ими движет всё это (Всё)' },
+                    { t: 108.0, end: 112.5, text: 'Сделал сам и смог, остался собой через кровь и пот' },
+                    { t: 112.5, end: 118.0, text: 'Не знаю слова "стоп" (Не знаю)' },
+                    { t: 118.0, end: 134.0, text: 'By my own, я-я, во-о-оу' }
+                ]
+            },
+            MIKRO_444: {
+                title: 'OG Buda — На Микро Вечен',
+                sub: 'Имбовый дроп с 04:45 • Полный трек 06:00',
+                badge: 'DROP 04:45 • НА МИКРО ВЕЧЕН',
+                indicator: '[дроп 04:45 — всё чаще двигаюсь в соло]',
+                jumpLabel: '↺ DROP 04:45',
+                defaultStart: 285.0,
+                totalDuration: 360,
+                leadOffset: 0.0,
+                cover: '#cover-sner',
+                cues: [
+                    { t: 0.0,   end: 5.0,   text: 'Я, ту-ру-ту-ту' },
+                    { t: 5.0,   end: 10.5,  text: 'Ту, ту-ту-ту-ту-ту-ту' },
+                    { t: 10.5,  end: 16.0,  text: 'rawr on the track' },
+                    { t: 16.0,  end: 21.5,  text: 'Не бессмертный, ту-ру-ту-ту-ту' },
+                    { t: 21.5,  end: 23.6,  text: 'Не бессмертный, но на микро вечен' },
+                    { t: 23.6,  end: 26.0,  text: 'Все мои пацаны — звёзды, рэп-игра — вечер (А-а)' },
+                    { t: 26.0,  end: 28.5,  text: 'Слушать не значит слышать, вникай в дар речи (А-е)' },
+                    { t: 28.5,  end: 31.0,  text: 'Забавно, то, что убивает всех, меня лечит (У-у)' },
+                    { t: 31.0,  end: 33.5,  text: 'Откровения у микро, мне не стрёмно (Фью)' },
+                    { t: 33.5,  end: 36.2,  text: 'Рассказать, признаться, что я боялся, как тёлка (А)' },
+                    { t: 36.2,  end: 39.2,  text: 'Когда наша троица дропала те самых три альбома: (О-о)' },
+                    { t: 39.2,  end: 41.5,  text: '(Те самых три альбома, я:)' },
+                    { t: 41.5,  end: 44.0,  text: '"Опиаты", "ОПГ", "NO LABEL" Кристалла' },
+                    { t: 44.0,  end: 46.5,  text: 'В сравнении с пацанами, казалось, сделал слабо (О-о, е)' },
+                    { t: 46.5,  end: 49.0,  text: 'Харизма вывозила, музычка отставала' },
+                    { t: 49.0,  end: 51.5,  text: 'Тогда был другой хайп, бро, была другая слава' },
+                    { t: 51.5,  end: 54.0,  text: 'Малая нравилась тогда, сейчас другая стала' },
+                    { t: 54.0,  end: 56.5,  text: 'Но я не осуждаю, бро, мы все другими стали' },
+                    { t: 56.5,  end: 58.8,  text: 'Ха, махнулись местами' },
+                    { t: 58.8,  end: 62.0,  text: 'Реальность на место ставит и закаляет жёстче стали, эй (Фью)' },
+                    { t: 62.0,  end: 66.5,  text: 'Но вернёмся к временам, когда стеснялся своего флоу (Своего флоу)' },
+                    { t: 66.5,  end: 71.0,  text: 'Я клянусь, я стеснялся показать демку своему бро-о-о-о-а (А)' },
+                    { t: 71.0,  end: 74.0,  text: 'Тогда ещё даже баттлы не оценивал Флом (Флом)' },
+                    { t: 74.0,  end: 77.0,  text: 'Ты знаешь всю мою боль, если знаешь мой лор (Спасибо)' },
+                    { t: 77.0,  end: 79.8,  text: 'С целью покорить Москву я покидаю дом (Skrrt, skkrt)' },
+                    { t: 79.8,  end: 82.5,  text: 'Времена, когда на тамбуре писался в долг (У-у-у)' },
+                    { t: 82.5,  end: 85.0,  text: 'В группе ВК человек шестьсот (Эй)' },
+                    { t: 85.0,  end: 87.5,  text: 'Но ощущаю их как миллион (Эй)' },
+                    { t: 87.5,  end: 90.2,  text: 'Малые пишут, что я стрельну скоро (Вот твоя…)' },
+                    { t: 90.2,  end: 93.0,  text: 'В комментах под треком "8:40" (У-у; курю double)' },
+                    { t: 93.0,  end: 95.2,  text: 'Помню, как вышло "Розовое вино" (Е)' },
+                    { t: 95.2,  end: 97.5,  text: 'Если честно, эта песня изменила всё (Эй)' },
+                    { t: 97.5,  end: 100.2, text: 'Брат на своём примере показал, что всё реально' },
+                    { t: 100.2, end: 103.0, text: 'Работай, старайся, и твой момент настанет' },
+                    { t: 103.0, end: 105.5, text: 'Помню тот день, когда не стало Дани' },
+                    { t: 105.5, end: 108.0, text: 'Прям среди праздника, шокирующий звонок от Тани (stpx!)' },
+                    { t: 108.0, end: 110.5, text: 'С того дня никто не был прежним, все поменялись' },
+                    { t: 110.5, end: 113.0, text: 'Просто знай, на всех треках Мелонов Даня с нами' },
+                    { t: 113.0, end: 115.2, text: 'Я был на таком броуке' },
+                    { t: 115.2, end: 118.5, text: 'Даже не смог приехать на похороны, до сих пор больно' },
+                    { t: 118.5, end: 123.5, text: 'Просто знай, если бы Данёк был тут, он бы ебал рэп игру сольно' },
+                    { t: 123.5, end: 125.8, text: 'Опускаю руки, начинаю моросить' },
+                    { t: 125.8, end: 128.0, text: 'Честно, не вывожу Московскую жизнь (Я)' },
+                    { t: 128.0, end: 130.5, text: 'Год не оплачен ЖКХ, постоянно бухаю (А-а)' },
+                    { t: 130.5, end: 133.0, text: 'Не пишу рэп, морось, мне ломают ебальник (Ах)' },
+                    { t: 133.0, end: 135.5, text: 'Увольняют с работы, надежд почти не осталось' },
+                    { t: 135.5, end: 138.0, text: '"Всё хорошо у меня", — вру по телефону маме' },
+                    { t: 138.0, end: 140.8, text: 'Пацаны видят, не бросили, они поддержали' },
+                    { t: 140.8, end: 143.5, text: 'То, какие у меня друзья, поражает (Е)' },
+                    { t: 143.5, end: 145.8, text: 'Подтягивают меня в тур бэчить (Бэчить)' },
+                    { t: 145.8, end: 148.5, text: 'Это лучшее время, двигаюсь с Рожком и Федей (А-а)' },
+                    { t: 148.5, end: 151.2, text: 'Появляется чувство, что оба в меня верят' },
+                    { t: 151.2, end: 154.0, text: 'Щас вернусь писать альбом, и он реально стрельнет' },
+                    { t: 154.0, end: 156.5, text: 'Возвращаюсь, привожу с тура чуть денег' },
+                    { t: 156.5, end: 159.0, text: 'Сразу въёбываю половину — я нарк и бездельник' },
+                    { t: 159.0, end: 161.5, text: 'Постоянно пытаюсь остаться в гостях на Белке' },
+                    { t: 161.5, end: 164.0, text: 'Так не хочу домой, у меня там даже нет инета' },
+                    { t: 164.0, end: 166.8, text: 'В туре знакомлюсь с Облой, зовёт на разогрев концерта' },
+                    { t: 166.8, end: 169.5, text: 'Охуеть, у меня было только три хуёвых трека (Да)' },
+                    { t: 169.5, end: 172.0, text: 'Он показал мне Платину, я охуел конкретно' },
+                    { t: 172.0, end: 174.5, text: 'Написал Роберту, коннектимся мгновенно' },
+                    { t: 174.5, end: 177.2, text: 'Знакомимся вживую, 2-0-1-8, лето' },
+                    { t: 177.2, end: 180.0, text: 'У Робчика идея: "Как тебе наша совместка?"' },
+                    { t: 180.0, end: 182.8, text: 'Я такой: "Я твой фэн, брат, погнали, конечно"' },
+                    { t: 182.8, end: 185.2, text: 'У меня есть чувство, что это выйдет успешно (О-о)' },
+                    { t: 185.2, end: 187.5, text: 'Так и случилось: "Сладких снов" — легенда (Уо-о-о)' },
+                    { t: 187.5, end: 194.5, text: 'Знакомлюсь с Кри, только писалась "ОПГха" (Уо-о-о)' },
+                    { t: 194.5, end: 199.5, text: 'Первый собственный тур с Робчиком, Влади и Эклером (Уо-о-о; бля)' },
+                    { t: 199.5, end: 205.5, text: 'Братья пригнали в Москву, открыли студию Melon (Ха-а, fuck!)' },
+                    { t: 205.5, end: 213.0, text: 'Fuck, и с тех пор ничего не было как прежде (А-а-а)' },
+                    { t: 213.0, end: 219.0, text: '(А) Потерял её, и ничего не было как прежде (Я-а-а, рэп-игра, рэп-игра)' },
+                    { t: 219.0, end: 225.5, text: 'Мы появились, и рэп-игра уже не была прежней, nah (Ха-ха, nah, ха-ха, воу)' },
+                    { t: 225.5, end: 231.5, text: 'И, раньше стеснялся легенд, ща я среди них как здешний (Я, у-у)' },
+                    { t: 231.5, end: 234.8, text: 'Я, бэйби, из-за тебя весь альбом будет полон саморефлексии' },
+                    { t: 234.8, end: 238.0, text: 'Так давно не испытывал эйфории, я работал много, это не везение (А)' },
+                    { t: 238.0, end: 241.5, text: 'Глушу чувства типа амнезии, жалуюсь в микро типа терапии' },
+                    { t: 241.5, end: 245.0, text: 'Песен о тебе будет ещё тысячи, так что, малая, просто терпи их, е' },
+                    { t: 245.0, end: 248.2, text: 'А (О-о), у меня проблемы суперзвезды, не бытовые' },
+                    { t: 248.2, end: 251.5, text: 'Да, я любил пару раз в своей жизни, но знай: то, как люблю тебя, — это впервые (Это впервые)' },
+                    { t: 251.5, end: 258.0, text: 'Мы познакомились, я ещё только писал "ОПГ СИТИ", а (Ха)' },
+                    { t: 258.0, end: 261.5, text: 'Е, в каком-то смысле можно сказать — я сделал тебя, ты звезда теперь' },
+                    { t: 261.5, end: 264.5, text: 'И, хуй клал на проблемы, а-а, мне пизда теперь (Секрет, я)' },
+                    { t: 264.5, end: 268.5, text: 'И, пути назад уже нет, неужели будет так всегда теперь? (О-о)' },
+                    { t: 268.5, end: 272.0, text: 'Е, иногда кажется, что мне по кайфу боль, буду всегда терпеть' },
+                    { t: 272.0, end: 274.0, text: 'Её (Буду всегда терпеть её, а-а)' },
+                    { t: 274.0, end: 277.0, text: 'Ведь больше нет таких, как она-а-а-а (Зачем? Зачем?)' },
+                    { t: 277.0, end: 280.0, text: 'Зачем я просчитываю высоту падения из окна, скажи?' },
+                    { t: 280.0, end: 285.0, text: 'Они улыбаются мне в лицо, отворачиваюсь — сразу в спину ножи (А-а-а)' },
+                    { t: 285.0, end: 288.8, text: '(Воу, а) Я всё чаще двигаюсь в соло (Эй, один)' },
+                    { t: 288.8, end: 292.0, text: 'Просто лежу, смотрю в потолок от пола' },
+                    { t: 292.0, end: 295.8, text: 'Ты живёшь свою лучшую жизнь — тебе это не знакомо' },
+                    { t: 295.8, end: 300.0, text: 'Е, самый родной мой человек, но щас, когда видимся, ты не знакома' },
+                    { t: 300.0, end: 303.8, text: 'Е, странное чувство, гашусь от всех, триста пропущенных от мамы (А)' },
+                    { t: 303.8, end: 307.5, text: 'Е, знаю, она волнуется, да и самому брать трубки неприятно' },
+                    { t: 307.5, end: 311.0, text: 'Е, но я настолько не в ресурсе, даже не могу разговаривать (Е)' },
+                    { t: 311.0, end: 314.8, text: 'Е, весь мир — это ёбаный тлен, только на студийке расцветаю я' },
+                    { t: 314.8, end: 318.2, text: 'И только ты, да, только ты научила показывать слабость' },
+                    { t: 318.2, end: 321.6, text: 'Е, поэтому, когда прихожу забрать собак, могу с порога расплакаться (А-а-а)' },
+                    { t: 321.6, end: 325.0, text: 'Е, да я врубаюсь, что я натворил хуйни, бэйби, и это расплата щас' },
+                    { t: 325.0, end: 328.2, text: 'Е, заехал в охуевшую хату, но планировалась-то она для нас' },
+                    { t: 328.2, end: 331.5, text: 'Поэтому мне там так одиноко щас, чувство, будто не— fuck' },
+                    { t: 331.5, end: 336.0, text: 'Чувство—, бля, я (А), чувство, будто не блэсснут, хоть и денег так много щас (Много щас)' },
+                    { t: 336.0, end: 339.5, text: 'Я умираю (Я умираю), я умираю, а тебе похуй щас' },
+                    { t: 339.5, end: 343.0, text: 'Альбом выходит через две недели, может, выпилиться и сдохну легендой щас?' },
+                    { t: 343.0, end: 346.5, text: 'Интруха уже где-то шесть минут, для них нынче это долго щас (А)' },
+                    { t: 346.5, end: 350.2, text: 'Уже почти год на трезвых, скажи, почему же мне так хуёво щас?' },
+                    { t: 350.2, end: 353.8, text: 'Они скажут: "Альбом снова хуйня, снова ноет по бывшей"' },
+                    { t: 353.8, end: 360.0, text: 'Е, скажи, малой, как мне петь о другом, если она стала смыслом жизни?' }
+                ]
+            }
+        };
+
+        let audioCtx = null;
+        let analyser = null;
+        let isPlaying = false;
+
+        let currentStage = 'OUTRO_GRUST2';
+        let currentTimeSec = TRACK_CONFIG.OUTRO_GRUST2.defaultStart;
+        let activeLineIndex = -1;
+        let seekGuardUntil = 0;
+        let entered = false;
+        let audioSetupDone = false;
+        let userScrollUntil = 0;
+        let isScrubbing = false;
+        let lastBassText = '';
+        let activeWordEls = [];
+        let lastWordIdx = -2;
+
+        let customAudios = { OUTRO_GRUST2: null, ZAMER_MAIN: null, MIKRO_444: null };
+        let connectedElements = new WeakSet();
+
+        function enterProfile() {
+            if (entered) return;               /* защита от двойного тапа */
+            entered = true;
+            const gate = document.getElementById('enter-overlay');
+            if (gate) gate.classList.add('gate-hidden');
+            triggerCinematicReveal();
+            initAudioEngine();
+        }
+
+        function triggerCinematicReveal() {
+            const shell = document.getElementById('bento-shell');
+            const items = ['stagger-1', 'stagger-2', 'stagger-3', 'stagger-4'].map(id => document.getElementById(id));
+
+            shell.classList.remove('shell-pre-reveal');
+            shell.classList.add('shell-loaded');
+
+            [150, 350, 550, 750].forEach((delay, idx) => {
+                setTimeout(() => {
+                    if (items[idx]) items[idx].classList.add('revealed');
+                }, delay);
+            });
+        }
+
+        function connectAudioElementToGraph(audEl) {
+            if (IS_MOBILE || window.location.protocol === 'file:') return;
+            if (!audioCtx || !analyser || !audEl || connectedElements.has(audEl)) return;
+            try {
+                const src = audioCtx.createMediaElementSource(audEl);
+                src.connect(analyser);
+                analyser.connect(audioCtx.destination);
+                connectedElements.add(audEl);
+            } catch (e) {}
+        }
+
+        /* РАЗБЛОКИРОВКА АУДИОДОРОЖЕК ПРИ ПЕРВОМ ТАПЕ НА ТЕЛЕФОНЕ */
+        function primeAllAudiosOnGesture() {
+            ['ZAMER_MAIN', 'MIKRO_444'].forEach(key => {
+                const a = customAudios[key];
+                if (!a || a._primed) return;
+                a._primed = true;
+                const prevMuted = a.muted;
+                a.muted = true;
+                const finish = () => {
+                    /* если пользователь уже успел выбрать этот трек — не глушим и не ставим на паузу */
+                    if (currentStage !== key) a.pause();
+                    a.muted = (currentStage === key) ? false : prevMuted;
+                };
+                const p = a.play();
+                if (p && typeof p.then === 'function') {
+                    p.then(finish).catch(() => { a.muted = (currentStage === key) ? false : prevMuted; });
+                } else {
+                    finish();
+                }
+            });
+        }
+
+        function handlePlayError(err) {
+            const name = err && err.name;
+            if (name === 'NotAllowedError' || name === 'NotSupportedError') {
+                isPlaying = false;
+                updatePlayPauseUI();
+                showToast(name === 'NotSupportedError'
+                    ? 'Аудиофайл не найден или не поддерживается'
+                    : 'Нажмите ▶, чтобы включить звук');
+            }
+        }
+
+        /* УНИВЕРСАЛЬНЫЙ ЗАПУСК И ПРЯМАЯ ПРИВЯЗКА К ТАЙМКОДУ (ДРОП ИЛИ 00:00) ДЛЯ ТЕЛЕФОНА И ПК */
+        function playAndSeekTo(aud, targetSec) {
+            currentTimeSec = targetSec;
+            seekGuardUntil = performance.now() + 1400;
+            if (!aud) return;
+
+            if (audioCtx && audioCtx.state === 'suspended') {
+                try { audioCtx.resume(); } catch (e) {}
+            }
+            connectAudioElementToGraph(aud);
+            aud.volume = parseFloat(document.getElementById('volume-slider').value);
+            aud.muted = false;
+            aud._targetSeek = targetSec;
+
+            const enforceSeek = () => {
+                if (typeof aud._targetSeek !== 'number') return;
+                const wanted = aud._targetSeek;
+                try {
+                    if (aud.readyState >= 1) {
+                        if (Math.abs(aud.currentTime - wanted) > 0.9) {
+                            aud.currentTime = wanted;
+                        }
+                        if (Math.abs(aud.currentTime - wanted) <= 1.2) {
+                            aud._targetSeek = null;
+                            seekGuardUntil = 0;
+                        }
+                    }
+                } catch (e) {}
+            };
+
+            if (!aud._seekListenersBound) {
+                aud._seekListenersBound = true;
+                aud.addEventListener('loadedmetadata', enforceSeek);
+                aud.addEventListener('loadeddata', enforceSeek);
+                aud.addEventListener('canplay', enforceSeek);
+                aud.addEventListener('playing', enforceSeek);
+                aud.addEventListener('timeupdate', () => {
+                    if (typeof aud._targetSeek === 'number') {
+                        enforceSeek();
+                    }
+                });
+            }
+            aud._enforceSeek = enforceSeek;
+
+            enforceSeek();
+
+            if (isPlaying) {
+                const p = aud.play();
+                if (p && typeof p.then === 'function') {
+                    p.then(() => {
+                        enforceSeek();
+                        setTimeout(enforceSeek, 60);
+                        setTimeout(enforceSeek, 220);
+                    }).catch(handlePlayError);
+                }
+            }
+        }
+
+        function setupAudioListeners() {
+            if (audioSetupDone) return;
+            audioSetupDone = true;
+            const initialVol = parseFloat(document.getElementById('volume-slider').value);
+            ['OUTRO_GRUST2', 'ZAMER_MAIN', 'MIKRO_444'].forEach(stageKey => {
+                const domAud = document.getElementById('audio-' + stageKey);
+                if (!domAud) return;
+
+                domAud.volume = initialVol;
+                customAudios[stageKey] = domAud;
+
+                domAud.addEventListener('ended', () => {
+                    if (stageKey !== currentStage) return;
+                    if (currentStage === 'OUTRO_GRUST2') {
+                        selectAlbumTrack('ZAMER_MAIN', true, 'drop');
+                    } else if (currentStage === 'ZAMER_MAIN') {
+                        selectAlbumTrack('MIKRO_444', true, 'drop');
+                    } else {
+                        selectAlbumTrack('OUTRO_GRUST2', true, 'drop');
+                    }
+                });
+
+                /* синхронизация кнопки с реальным состоянием (звонок, наушники, шторка уведомлений) */
+                domAud.addEventListener('pause', () => {
+                    if (stageKey === currentStage && isPlaying && !domAud.ended && !isScrubbing) {
+                        isPlaying = false;
+                        updatePlayPauseUI();
+                    }
+                });
+                domAud.addEventListener('play', () => {
+                    if (stageKey === currentStage && !isPlaying) {
+                        isPlaying = true;
+                        updatePlayPauseUI();
+                    }
+                });
+            });
+        }
+
+        function initAudioEngine() {
+            setupAudioListeners();             /* если тап пришёл раньше инициализации страницы */
+            if (!IS_MOBILE) {
+                try {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (!audioCtx && AudioCtx) {
+                        audioCtx = new AudioCtx();
+                        analyser = audioCtx.createAnalyser();
+                        analyser.fftSize = 64;
+                    }
+                    if (audioCtx && audioCtx.state === 'suspended') {
+                        audioCtx.resume();
+                    }
+                } catch (e) {}
+            }
+
+            isPlaying = true;
+            updatePlayPauseUI();
+            primeAllAudiosOnGesture();
+            selectAlbumTrack('OUTRO_GRUST2', false, 'drop');
+            runAudioReactiveLoop();
+        }
+
+        function buildSpotifyLyricsList(stage) {
+            const viewport = document.getElementById('spotify-lyrics-viewport');
+            if (!viewport) return;
+            const cues = TRACK_CONFIG[stage].cues;
+            activeLineIndex = -1;
+            activeWordEls = [];
+            lastWordIdx = -2;
+
+            viewport.innerHTML = cues.map((cue, lineIdx) => {
+                const words = cue.text.split(' ');
+                const wordsHtml = words.map((w, wIdx) => `<span class="sp-word" data-w="${wIdx}">${escapeHtml(w)}</span>`).join(' ');
+                return `
+                    <div class="sp-lyric-line" id="sp-line-${lineIdx}" onclick="seekToLyricLine(${lineIdx})">
+                        <span class="font-mono-code text-[9px] text-zinc-500 mr-2 opacity-60">${formatTime(cue.t)}</span>
+                        <span>${wordsHtml}</span>
+                        <div class="sp-line-progress" id="sp-prog-${lineIdx}"></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function seekToLyricLine(lineIdx) {
+            const cfg = TRACK_CONFIG[currentStage];
+            const cue = cfg.cues[lineIdx];
+            if (!cue) return;
+
+            isPlaying = true;
+            updatePlayPauseUI();
+
+            const activeAud = customAudios[currentStage];
+            playAndSeekTo(activeAud, cue.t);
+
+            activeLineIndex = -1;
+            syncSpotifyLyrics(cue.t, true);
+            updateTimelineUI(cue.t, cfg.totalDuration);
+        }
+
+        /* forceScroll — применить прокрутку, даже если пользователь сам листает; instant — без анимации */
+        function syncSpotifyLyrics(rawSec, forceScroll = false, instant = false) {
+            const cfg = TRACK_CONFIG[currentStage];
+            const trackLead = (typeof cfg.leadOffset === 'number') ? cfg.leadOffset : 0.0;
+            const sec = rawSec + trackLead;
+            const cues = cfg.cues;
+
+            let idx = 0;
+            for (let i = 0; i < cues.length; i++) {
+                if (sec >= cues[i].t) idx = i;
+            }
+
+            const viewport = document.getElementById('spotify-lyrics-viewport');
+
+            if (idx !== activeLineIndex || forceScroll) {
+                const lineChanged = (idx !== activeLineIndex) || forceScroll;
+                activeLineIndex = idx;
+
+                for (let i = 0; i < cues.length; i++) {
+                    const lineEl = document.getElementById('sp-line-' + i);
+                    const progEl = document.getElementById('sp-prog-' + i);
+                    if (!lineEl) continue;
+
+                    lineEl.classList.toggle('sp-past', i < idx);
+                    lineEl.classList.toggle('sp-active', i === idx);
+
+                    if (i !== idx && progEl) {
+                        progEl.style.width = '0%';
+                    }
+                }
+
+                const activeEl = document.getElementById('sp-line-' + idx);
+                if (lineChanged) {
+                    activeWordEls = activeEl ? Array.from(activeEl.querySelectorAll('.sp-word')) : [];
+                    lastWordIdx = -2;
+                }
+
+                /* не дёргаем прокрутку, пока пользователь сам листает текст пальцем */
+                if (activeEl && viewport && (forceScroll || performance.now() >= userScrollUntil)) {
+                    const targetScroll = Math.max(0, activeEl.offsetTop - (viewport.clientHeight / 2) + (activeEl.clientHeight / 2));
+                    if (instant) {
+                        viewport.style.scrollBehavior = 'auto';
+                        viewport.scrollTop = targetScroll;
+                        viewport.style.scrollBehavior = '';
+                    } else {
+                        viewport.scrollTo({ top: targetScroll, behavior: 'smooth' });
+                    }
+                }
+            }
+
+            const cue = cues[idx];
+            const spanDur = Math.max(0.5, (cue.end || (cue.t + 4)) - cue.t);
+            const progress = Math.max(0, Math.min(1, (sec - cue.t) / spanDur));
+
+            const activeProgEl = document.getElementById('sp-prog-' + idx);
+            if (activeProgEl) {
+                activeProgEl.style.width = `${(progress * 94).toFixed(1)}%`;
+            }
+
+            /* классы слов меняем только когда сменилось текущее слово, а не 60 раз в секунду */
+            if (activeWordEls.length) {
+                const currentWordIdx = Math.floor(progress * activeWordEls.length);
+                if (currentWordIdx !== lastWordIdx) {
+                    lastWordIdx = currentWordIdx;
+                    activeWordEls.forEach((wEl, wIdx) => {
+                        wEl.classList.toggle('word-sung', wIdx < currentWordIdx);
+                        wEl.classList.toggle('word-current', wIdx === currentWordIdx);
+                        wEl.classList.toggle('word-upcoming', wIdx > currentWordIdx);
+                    });
+                }
+            }
+        }
+
+        function selectAlbumTrack(stage, showNotification = true, startMode = 'start') {
+            currentStage = stage;
+            isPlaying = true;
+            updatePlayPauseUI();
+
+            Object.entries(customAudios).forEach(([key, aud]) => {
+                if (aud && key !== stage) {
+                    aud._targetSeek = null;
+                    aud.pause();
+                }
+            });
+
+            document.getElementById('track-row-grust2').classList.toggle('active-track', stage === 'OUTRO_GRUST2');
+            document.getElementById('track-row-zamer').classList.toggle('active-track', stage === 'ZAMER_MAIN');
+            document.getElementById('track-row-sner').classList.toggle('active-track', stage === 'MIKRO_444');
+
+            const cfg = TRACK_CONFIG[stage];
+            const startTime = (startMode === 'drop') ? cfg.defaultStart : 0.0;
+
+            document.getElementById('active-cover-use').setAttribute('href', cfg.cover);
+            document.getElementById('deck-track-title').textContent = cfg.title;
+            document.getElementById('deck-track-sub').textContent = cfg.sub;
+            document.getElementById('lyric-mode-badge').textContent = (startMode === 'drop')
+                ? cfg.badge
+                : `00:00 • ${cfg.title.toUpperCase()}`;
+            document.getElementById('transition-indicator').textContent = cfg.indicator;
+            document.getElementById('key-jump-btn').textContent = cfg.jumpLabel;
+            updateMediaSessionMeta(cfg);
+
+            if (stage === 'ZAMER_MAIN') {
+                const shell = document.getElementById('bento-shell');
+                shell.classList.remove('zamer-impact-active');
+                void shell.offsetWidth;
+                shell.classList.add('zamer-impact-active');
+            }
+
+            buildSpotifyLyricsList(stage);
+            const activeAud = customAudios[stage];
+            playAndSeekTo(activeAud, startTime);
+
+            activeLineIndex = -1;
+            syncSpotifyLyrics(startTime, true, true);
+            updateTimelineUI(startTime, cfg.totalDuration);
+
+            if (showNotification) {
+                const label = (startMode === 'drop') ? `Дроп ${formatTime(cfg.defaultStart)}` : 'С начала 00:00';
+                showToast(`${cfg.title} • ${label}`);
+            }
+        }
+
+        function jumpToKeyMoment(ev) {
+            if (ev) ev.stopPropagation();
+            isPlaying = true;
+            updatePlayPauseUI();
+
+            const cfg = TRACK_CONFIG[currentStage];
+            document.getElementById('lyric-mode-badge').textContent = cfg.badge;
+
+            const activeAud = customAudios[currentStage];
+            playAndSeekTo(activeAud, cfg.defaultStart);
+
+            activeLineIndex = -1;
+            syncSpotifyLyrics(cfg.defaultStart, true, true);
+            updateTimelineUI(cfg.defaultStart, cfg.totalDuration);
+            showToast(`${cfg.title} • Дроп ${formatTime(cfg.defaultStart)}`);
+        }
+
+        /* 4. ВИЗУАЛИЗАТОР И 60-FPS ЧАСЫ СИНХРОНИЗАЦИИ АУДИО */
+        const visCanvas = document.getElementById('visualizer-canvas');
+        const visCtx = visCanvas.getContext('2d');
+
+        function runAudioReactiveLoop() {
+            requestAnimationFrame(runAudioReactiveLoop);
+
+            const now = performance.now();
+            const activeAud = customAudios[currentStage];
+            const isTrackActive = isPlaying && activeAud && !activeAud.paused && activeAud.readyState > 0;
+
+            if (isTrackActive) {
+                const total = (activeAud.duration && isFinite(activeAud.duration))
+                    ? activeAud.duration
+                    : TRACK_CONFIG[currentStage].totalDuration;
+
+                const isLockedForSeek = (typeof activeAud._targetSeek === 'number') && (now < seekGuardUntil);
+                if (!isLockedForSeek && !activeAud.seeking && !isScrubbing) {
+                    currentTimeSec = activeAud.currentTime;
+                }
+
+                syncSpotifyLyrics(currentTimeSec, false);
+                if (!isScrubbing) updateTimelineUI(currentTimeSec, total);
+            }
+
+            /* визуализатор рисуем только когда вкладка плеера видна */
+            const visVisible = visCanvas.offsetParent !== null;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const w = visCanvas.clientWidth || 300;
+            const h = visCanvas.clientHeight || 20;
+            if (visVisible) {
+                const pw = Math.round(w * dpr), ph = Math.round(h * dpr);
+                if (visCanvas.width !== pw) visCanvas.width = pw;
+                if (visCanvas.height !== ph) visCanvas.height = ph;
+                visCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                visCtx.clearRect(0, 0, w, h);
+            }
+
+            let dataArray = new Uint8Array(32);
+            let hasFreqData = false;
+
+            if (analyser && isTrackActive && connectedElements.has(activeAud)) {
+                analyser.getByteFrequencyData(dataArray);
+                for (let i = 0; i < 8; i++) {
+                    if (dataArray[i] > 0) hasFreqData = true;
+                }
+            }
+
+            if (isTrackActive && !hasFreqData) {
+                const t = now * 0.008;
+                for (let i = 0; i < 32; i++) {
+                    const wave = Math.abs(Math.sin(t + i * 0.45)) * 185 + (i < 6 ? 55 : 15);
+                    dataArray[i] = Math.min(255, Math.floor(wave));
+                }
+            }
+
+            let bassSum = 0;
+            for (let i = 0; i < 6; i++) bassSum += dataArray[i];
+            currentBassEnergy = isTrackActive ? Math.min(1, bassSum / (6 * 200)) : 0;
+
+            const dbVal = isTrackActive ? (-16 + currentBassEnergy * 16).toFixed(1) : '-∞';
+            const bassText = `BASS: ${dbVal} dB`;
+            if (bassText !== lastBassText) {
+                lastBassText = bassText;
+                document.getElementById('bass-db-meter').textContent = bassText;
+            }
+
+            if (!visVisible) return;
+
+            const bars = 32;
+            const barW = (w / bars) - 2;
+            for (let i = 0; i < bars; i++) {
+                const v = isTrackActive ? (dataArray[i % dataArray.length] / 255) : 0.08;
+                const barH = Math.max(3, v * h);
+                const x = i * (barW + 2);
+                const y = h - barH;
+                visCtx.fillStyle = i < 12 ? '#e11d2a' : 'rgba(161, 161, 170, 0.35)';
+                visCtx.beginPath();
+                visCtx.roundRect(x, y, barW, barH, 1.5);
+                visCtx.fill();
+            }
+        }
+
+        function updateTimelineUI(cur, tot) {
+            if (!isFinite(cur) || cur < 0) cur = 0;
+            if (!tot || !isFinite(tot)) tot = TRACK_CONFIG[currentStage].totalDuration;
+            document.getElementById('current-time').textContent = formatTime(cur);
+            document.getElementById('total-time').textContent = formatTime(tot);
+            const pct = Math.min(100, Math.max(0, (cur / tot) * 100));
+            document.getElementById('timeline-fill').style.width = `${pct.toFixed(1)}%`;
+            const hit = document.getElementById('timeline-hit');
+            if (hit) hit.setAttribute('aria-valuenow', Math.round(pct));
+        }
+
+        function getStageTotal() {
+            const cfg = TRACK_CONFIG[currentStage];
+            const a = customAudios[currentStage];
+            return (a && a.duration && isFinite(a.duration)) ? a.duration : cfg.totalDuration;
+        }
+
+        function ratioFromEvent(e) {
+            const rect = document.getElementById('timeline-bar').getBoundingClientRect();
+            return Math.max(0, Math.min(1, (e.clientX - rect.left) / (rect.width || 1)));
+        }
+
+        function commitScrub(ratio) {
+            const total = getStageTotal();
+            const targetSec = ratio * total;
+            playAndSeekTo(customAudios[currentStage], targetSec);
+            activeLineIndex = -1;
+            syncSpotifyLyrics(targetSec, true);
+            updateTimelineUI(targetSec, total);
+        }
+
+        /* оставлено для совместимости: одиночный клик по полосе */
+        function scrubTimeline(e) { commitScrub(ratioFromEvent(e)); }
+
+        /* перемотка пальцем/мышью с перетаскиванием + стрелки с клавиатуры */
+        function initTimelineScrub() {
+            const hit = document.getElementById('timeline-hit');
+            if (!hit) return;
+            hit.tabIndex = 0;
+            let ratio = 0;
+            hit.addEventListener('pointerdown', e => {
+                if (e.button !== undefined && e.button > 0) return;
+                isScrubbing = true;
+                try { hit.setPointerCapture(e.pointerId); } catch (err) {}
+                ratio = ratioFromEvent(e);
+                updateTimelineUI(ratio * getStageTotal(), getStageTotal());
+            });
+            hit.addEventListener('pointermove', e => {
+                if (!isScrubbing) return;
+                ratio = ratioFromEvent(e);
+                updateTimelineUI(ratio * getStageTotal(), getStageTotal());
+            });
+            const finish = e => {
+                if (!isScrubbing) return;
+                isScrubbing = false;
+                commitScrub(ratioFromEvent(e));
+            };
+            hit.addEventListener('pointerup', finish);
+            hit.addEventListener('pointercancel', () => { isScrubbing = false; });
+            hit.addEventListener('keydown', e => {
+                if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+                e.preventDefault();
+                const total = getStageTotal();
+                const target = Math.max(0, Math.min(total, currentTimeSec + (e.key === 'ArrowRight' ? 5 : -5)));
+                commitScrub(target / total);
+            });
+        }
+
+        function togglePlayback() {
+            isPlaying = !isPlaying;
+            const activeAud = customAudios[currentStage];
+            if (activeAud) {
+                if (isPlaying) playAndSeekTo(activeAud, currentTimeSec);
+                else activeAud.pause();
+            }
+            updatePlayPauseUI();
+        }
+
+        function updatePlayPauseUI() {
+            document.getElementById('play-icon').classList.toggle('hidden', isPlaying);
+            document.getElementById('pause-icon').classList.toggle('hidden', !isPlaying);
+            const btn = document.getElementById('play-toggle-btn');
+            if (btn) btn.setAttribute('aria-label', isPlaying ? 'Пауза' : 'Воспроизвести');
+            if ('mediaSession' in navigator) {
+                try { navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused'; } catch (e) {}
+            }
+        }
+
+        function setVolume(val) {
+            const v = parseFloat(val);
+            Object.values(customAudios).forEach(a => { if (a) a.volume = v; });
+        }
+
+        function formatTime(sec) {
+            if (!isFinite(sec) || sec < 0) sec = 0;
+            const m = String(Math.floor(sec / 60)).padStart(2, '0');
+            const s = String(Math.floor(sec % 60)).padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        /* Управление с экрана блокировки / наушников / браузерной шторки */
+        const TRACK_ORDER = ['OUTRO_GRUST2', 'ZAMER_MAIN', 'MIKRO_444'];
+        function updateMediaSessionMeta(cfg) {
+            if (!('mediaSession' in navigator) || !window.MediaMetadata) return;
+            try {
+                const parts = cfg.title.split(' — ');
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: parts[1] || cfg.title,
+                    artist: parts[0] || 'AweR',
+                    album: 'AweR // redhaze.ru'
+                });
+            } catch (e) {}
+        }
+        function initMediaSession() {
+            if (!('mediaSession' in navigator)) return;
+            const set = (action, fn) => { try { navigator.mediaSession.setActionHandler(action, fn); } catch (e) {} };
+            set('play', () => { if (!isPlaying) togglePlayback(); });
+            set('pause', () => { if (isPlaying) togglePlayback(); });
+            set('nexttrack', () => selectAlbumTrack(TRACK_ORDER[(TRACK_ORDER.indexOf(currentStage) + 1) % TRACK_ORDER.length], false, 'start'));
+            set('previoustrack', () => selectAlbumTrack(TRACK_ORDER[(TRACK_ORDER.indexOf(currentStage) + TRACK_ORDER.length - 1) % TRACK_ORDER.length], false, 'start'));
+        }
+
+        /* Enter/Space на строках треков (раньше работали только мышь и тап) */
+        document.addEventListener('keydown', e => {
+            if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.classList && e.target.classList.contains('track-row')) {
+                e.preventDefault();
+                e.target.click();
+            }
+        });
+
+        /* 5. TABS & BACKGROUND EMBERS */
+        function switchProfileTab(tabKey, btnEl) {
+            document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+
+            document.querySelectorAll('[data-tab-group]').forEach(sec => {
+                const group = sec.getAttribute('data-tab-group');
+                if (tabKey === 'all' || group === tabKey) {
+                    sec.classList.remove('bento-section-hidden');
+                } else {
+                    sec.classList.add('bento-section-hidden');
+                }
+            });
+
+            /* у скрытого блока нет размеров — после показа заново центрируем активную строку текста */
+            if (tabKey === 'all' || tabKey === 'music') {
+                requestAnimationFrame(() => {
+                    activeLineIndex = -1;
+                    syncSpotifyLyrics(currentTimeSec, true, true);
+                });
+            }
+        }
+
+        const bgCanvas = document.getElementById('bg-canvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let embers = [];
+
+        function initBgEmbers() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+            embers = Array.from({ length: PERF_LITE ? 22 : 40 }, () => ({
+                x: Math.random() * bgCanvas.width,
+                y: Math.random() * bgCanvas.height,
+                r: Math.random() * 1.5 + 0.5,
+                vy: -(Math.random() * 0.35 + 0.12),
+                a: Math.random() * 0.4 + 0.1
+            }));
+        }
+
+        /* раньше при повороте телефона / смене окна холст не пересчитывался */
+        function resizeBgCanvas() {
+            const w = window.innerWidth, h = window.innerHeight;
+            if (bgCanvas.width === w && bgCanvas.height === h) return;
+            bgCanvas.width = w;
+            bgCanvas.height = h;
+            embers.forEach(p => {
+                if (p.x > w) p.x = Math.random() * w;
+                if (p.y > h) p.y = Math.random() * h;
+            });
+        }
+        window.addEventListener('resize', resizeBgCanvas);
+
+        function animateBgEmbers() {
+            requestAnimationFrame(animateBgEmbers);
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            embers.forEach(p => {
+                p.y += p.vy;
+                if (p.y < -10) p.y = bgCanvas.height + 10;
+                bgCtx.beginPath();
+                bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                bgCtx.fillStyle = `rgba(225, 29, 42, ${p.a})`;
+                bgCtx.fill();
+            });
+        }
+
+        let toastTimeout = null;
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            t.classList.remove('opacity-0', '-translate-y-3');
+            t.classList.add('opacity-100', 'translate-y-0');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                t.classList.add('opacity-0', '-translate-y-3');
+                t.classList.remove('opacity-100', 'translate-y-0');
+            }, 2000);
+        }
+
+        function copyToClipboard(text, msg) {
+            const done = ok => showToast(ok ? msg : 'Не удалось скопировать');
+
+            /* user-select:none на * ломал копирование в Safari/iOS — для textarea включаем выделение явно */
+            const legacy = () => {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px;user-select:text;-webkit-user-select:text;';
+                document.body.appendChild(ta);
+                try { ta.focus({ preventScroll: true }); } catch (e) {}
+                ta.select();
+                try { ta.setSelectionRange(0, text.length); } catch (e) {}
+                let ok = false;
+                try { ok = document.execCommand('copy'); } catch (e) {}
+                document.body.removeChild(ta);
+                return ok;
+            };
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => done(true)).catch(() => done(legacy()));
+            } else {
+                done(legacy());
+            }
+        }
+
+        function initPage() {
+            /* аватар: обработчик ошибки ставим сразу, а не в window.onload (тогда ошибка уже успевала пройти) */
+            const avatarEl = document.getElementById('avatar-img');
+            let fallbackUrl = null;
+            const getFallback = () => {
+                if (!fallbackUrl) {
+                    try { fallbackUrl = renderExactAvatarFallback(); } catch (e) { fallbackUrl = ''; }
+                }
+                return fallbackUrl;
+            };
+
+            const altNames = ['1.jpg', '1.jpeg', '1.webp'];
+            let tryIdx = 0;
+            avatarEl.onerror = function () {
+                if (tryIdx < altNames.length) {
+                    this.src = altNames[tryIdx++];
+                } else {
+                    this.onerror = null;
+                    const fb = getFallback();
+                    if (fb) this.src = fb;
+                }
+            };
+            if (avatarEl.complete && avatarEl.naturalWidth === 0) avatarEl.onerror();
+
+            setupAudioListeners();
+            buildSpotifyLyricsList('OUTRO_GRUST2');
+            syncSpotifyLyrics(TRACK_CONFIG.OUTRO_GRUST2.defaultStart, true, true);
+            updateTimelineUI(TRACK_CONFIG.OUTRO_GRUST2.defaultStart, TRACK_CONFIG.OUTRO_GRUST2.totalDuration);
+
+            const vp = document.getElementById('spotify-lyrics-viewport');
+            ['touchstart', 'wheel', 'pointerdown'].forEach(evName => {
+                vp.addEventListener(evName, () => { userScrollUntil = performance.now() + 3000; }, { passive: true });
+            });
+
+            initTimelineScrub();
+            initMediaSession();
+
+            /* на iOS громкость элемента <audio> программно не меняется — ползунок бесполезен */
+            if (IS_IOS) {
+                const vw = document.getElementById('volume-wrap');
+                if (vw) vw.style.display = 'none';
+            }
+
+            resizeBannerCanvas();
+            initSmoothBannerWords();
+            requestAnimationFrame(animateBudaBanner);
+
+            initBgEmbers();
+            requestAnimationFrame(animateBgEmbers);
+        }
+
+        /* запуск не ждёт window.onload: тап по экрану входа до полной загрузки раньше оставлял плеер «мёртвым» */
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
+        }
+    </script>
+</body>
+</html>
